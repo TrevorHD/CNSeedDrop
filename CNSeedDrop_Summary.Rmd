@@ -1,0 +1,175 @@
+---
+title: "CNSeedDrop_Summary"
+output: pdf_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(warning = FALSE)
+
+# Load packages
+library(tidyverse)
+library(ggplot2)
+library(gridExtra)
+
+#Initialise data
+data <- read.csv("SeedDropData.csv")
+
+# Add pappus conical volume and maximum cross-sectional area to data
+data %>% mutate(SeedVol = (pi/3)*((SeedWidth/2)^2)*SeedLength,
+                SeedCSA = pi*((SeedWidth/2)^2)) -> data
+
+# Create new data set that excludes instances where pappus length, width, or DT are NA
+data.new <- data[complete.cases(data[ , 23:25]), ]
+
+# Need unique plot indicators by block - plot 1 and plot 2 are not similar in any way across blocks
+data.new$PlotUnique = as.factor(paste(data.new$Block,"_",data.new$Plot))
+# use PlantID for position
+
+# Create a mowing y/n flag
+data.new$MowYN = ifelse(data.new$Mow == "CTL", 0, 1)
+
+```
+
+```{r PreliminaryAnalyses}
+# Distribution of average DT
+par(mfrow = c(1,2))
+boxplot(data.new$DT.Avg)
+hist(data.new$DT.Avg)
+```
+
+# Does terminal velocity vary by treatment?
+
+```{r}
+# Warming and mowing vs. average DT
+par(mfrow = c(1,2))
+boxplot(data.new$DT.Avg ~ data.new$Mow)
+boxplot(data.new$DT.Avg ~ data.new$Warming)
+
+## ANOVA
+# mowYN 
+mod.mowYN = lm(DT.Avg ~ MowYN, data= data.new)
+summary(mod.mowYN)
+
+# early vs. late mowing 
+mod.mow = lm(DT.Avg ~ Mow, data= data.new)
+summary(mod.mow)
+
+# warming
+mod.warm = lm(DT.Avg ~ Warming, data= data.new)
+summary(mod.warm)
+
+# interaction
+mod.int = lm(DT.Avg ~ MowYN + Warming + MowYN:Warming, data= data.new)
+summary(mod.int)
+anova(mod.int)
+#plot(mod.int)
+```
+
+Conclusions: 
+
+1. Mowing (regardless of timing) significantly increases drop time. This difference appears to be driven by the early mow treatment, but it's not clear whether late mow shows no effect because there is truly no effect or becasue there are too few data. **Question: Group all mowing together into mowing Y/N or exclude late mow data points?**
+
+2. Warming significantly decreases drop time. [Interaction conclusion]
+
+## Does terminal velocity predicted by seed shape parameters?
+
+```{r PreliminaryAnalyses2}
+# Potential Predictors
+pairs(data.new[,c("DT.Avg","SeedLength","SeedWidth", "SeedVol","SeedCSA")])
+
+# plot DT vs. seed width by treatment
+ggplot(data = data.new, aes(x = SeedWidth, y = DT.Avg, color = Warming))+
+  geom_point()+
+  facet_wrap(data.new$Mow)
+
+```
+
+```{r Univariate}
+# Average DT ~ pappus length
+mod.L <- lm(DT.Avg ~ SeedLength, data = data.new)
+plot(DT.Avg ~ SeedLength, data = data.new)
+abline(mod.L, col = "red")
+summary(mod.L)
+plot(rstandard(mod.L) ~ SeedLength, data = data.new)
+abline(h = 0, col = "red")
+abline(h = c(-2, 2), col = "red", lty = 3)
+plot(mod.L, panel = panel.smooth)
+
+# Average DT ~ pappus width
+mod.W <- lm(DT.Avg ~ SeedWidth, data = data.new)
+plot(DT.Avg ~ SeedWidth, data = data.new)
+abline(mod.W, col = "red")
+summary(mod.W)
+plot(rstandard(mod.W) ~ SeedWidth, data = data.new)
+abline(h = 0, col = "red")
+abline(h = c(-2, 2), col = "red", lty = 3)
+plot(mod.W)
+
+# Log-transformed average DT ~ pappus width
+mod.W <- lm(log(DT.Avg) ~ SeedWidth, data = data.new)
+plot(log(DT.Avg) ~ SeedWidth, data = data.new)
+abline(mod.W, col = "red")
+summary(mod.W)
+plot(rstandard(mod.W) ~ SeedWidth, data = data.new)
+abline(h = 0, col = "red")
+abline(h = c(-2, 2), col = "red", lty = 3)
+plot(mod.W)
+
+# Square-root average DT ~ pappus width
+mod.W <- lm(DT.Avg ~ sqrt(SeedWidth), data = data.new)
+plot(DT.Avg ~ sqrt(SeedWidth), data = data.new)
+abline(mod.W, col = "red")
+summary(mod.W)
+plot(rstandard(mod.W) ~ SeedWidth, data = data.new)
+abline(h = 0, col = "red")
+abline(h = c(-2, 2), col = "red", lty = 3)
+
+# Average DT ~ pappus width only (w/ quadratic term)
+mod.W2 <- lm(DT.Avg ~ SeedWidth + I(SeedWidth^2), data = data.new)
+plot(DT.Avg ~ SeedWidth, data = data.new)
+curve(predict(mod.W2, newdata = data.frame(SeedWidth = x)), add = T, col = "red")
+summary(mod.W2)
+anova(mod.W, mod.W2)
+plot(rstandard(mod.W2) ~ SeedWidth, data = data.new)
+abline(h = 0, col = "red")
+abline(h = c(-2, 2), col = "red", lty = 3)
+
+# Average DT ~ pappus conical volume
+mod.V <- lm(DT.Avg ~ SeedVol, data = data.new)
+plot(DT.Avg ~ SeedVol, data = data.new)
+abline(mod.V, col = "red")
+summary(mod.V)
+plot(rstandard(mod.V) ~ SeedVol, data = data.new)
+abline(h = 0, col = "red")
+abline(h = c(-2, 2), col = "red", lty = 3)
+
+# Average DT ~ pappus max circular CSA
+mod.C <- lm(DT.Avg ~ SeedCSA, data = data.new)
+plot(DT.Avg ~ SeedCSA, data = data.new)
+abline(mod.C, col = "red")
+summary(mod.C)
+plot(rstandard(mod.C) ~ SeedCSA, data = data.new)
+abline(h = 0, col = "red")
+abline(h = c(-2, 2), col = "red", lty = 3)
+```
+
+```{r Multivariate}
+# Average DT ~ pappus width and length
+summary(lm(DT.Avg ~ SeedLength + SeedWidth, data = data))
+summary(lm(DT.Avg ~ SeedWidth + SeedLength, data = data))
+summary(lm(DT.Avg ~ SeedWidth + SeedLength + SeedWidth:SeedLength, data = data))
+
+# Average DT ~ warming and mowing treatments
+mod.WM <- lm(DT.Avg ~ Mow + Warming + Mow:Warming, data = data)
+summary(mod.WM)
+anova(mod.WM)
+
+# Average DT ~ warming and early mowing treatment
+data.new.2 <- subset(data.new, Mow != "L")
+mod.WM2 <- lm(DT.Avg ~ Mow + Warming, data = data.new.2)
+summary(mod.WM2)
+anova(mod.WM2)
+```
