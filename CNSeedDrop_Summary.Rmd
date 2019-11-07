@@ -5,7 +5,7 @@ editor_options:
   chunk_output_type: console
 ---
 
-```{r setup}
+```{r setup, include = FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 knitr::opts_chunk$set(warning = FALSE)
 
@@ -13,6 +13,7 @@ knitr::opts_chunk$set(warning = FALSE)
 library(tidyverse)
 library(ggplot2)
 library(gridExtra)
+library(agricolae)
 
 #Initialise data
 data <- read.csv("SeedDropData.csv")
@@ -31,24 +32,64 @@ data.new$PlotUnique = as.factor(paste(data.new$Block,"_",data.new$Plot))
 # Create a mowing y/n flag
 data.new$MowYN = ifelse(data.new$Mow == "CTL", 0, 1)
 
+# Create TV field from DT (ASSUMING TUBE LENGHT = 1.5m)
+data.new$TV = 1.25/data.new$DT.Avg
+
 ```
+
+
+Summary of findings:
+
+1. Mowing significant increases drop time whereas warming significantly decreases drop time. The observed difference in the mowing treatment appears to be driven by the early mow treatment. 
+
+2. The effect of mowing is not present when the data is transformed to terminal velocity. We see that warming significantly decreases terminal velocity. 
+
+3. Seed width and seed volume show similar reponses to warming and mowing. Both are decreased by mowing and warming, and the seeds that show the strongest effect are those which are both mowed and warmed (suggests interaction).   
+
+4. Plant height is significantly decreased by mowing. Warming allows early mowed plants to reach similar heights as warmed control plants. There is no significant difference between ambient/warmed late mowed plants. Non-mowed ambient plants are taller than warmed non-mowed plants. 
+
+
+Questions:
+
+1. Strategy for handling late mow
+
+
+To Dos: 
+
+1. GLM 
+
 
 ```{r PreliminaryAnalyses}
 # Distribution of average DT
 par(mfrow = c(1,2))
 boxplot(data.new$DT.Avg)
 hist(data.new$DT.Avg)
+
+# Distribution of TV
+par(mfrow = c(1,2))
+boxplot(data.new$TV)
+hist(data.new$TV)
 ```
 
-# Does terminal velocity vary by treatment?
+# Does drop time/terminal velocity vary by treatment?
 
-```{r}
+## Drop Time
+
+### Boxplot
+```{r DT_ByTreatment_Boxplot}
 # Warming and mowing vs. average DT
 par(mfrow = c(1,2))
 boxplot(data.new$DT.Avg ~ data.new$Mow)
 boxplot(data.new$DT.Avg ~ data.new$Warming)
+```
 
+### ANOVA: Warming and Mowing Alone
+```{r DT_ByTreatment_ANOVA}
 ## ANOVA
+# warming
+mod.warm = lm(DT.Avg ~ Warming, data= data.new)
+summary(mod.warm)
+
 # mowYN 
 mod.mowYN = lm(DT.Avg ~ MowYN, data= data.new)
 summary(mod.mowYN)
@@ -56,27 +97,270 @@ summary(mod.mowYN)
 # early vs. late mowing 
 mod.mow = lm(DT.Avg ~ Mow, data= data.new)
 summary(mod.mow)
+TukeyHSD(aov(DT.Avg ~ Mow, data= data.new))
+```
 
-# warming
-mod.warm = lm(DT.Avg ~ Warming, data= data.new)
-summary(mod.warm)
-
+### ANOVA: Warming and Mowing Multivariate
+```{r DT_ByTreatment_ANOVAInt}
 # interaction
 mod.int = lm(DT.Avg ~ MowYN + Warming + MowYN:Warming, data= data.new)
 summary(mod.int)
 anova(mod.int)
-#plot(mod.int)
+with(data.new, interaction.plot(x.factor = MowYN,Warming,response = DT.Avg))
 ```
 
 Conclusions: 
 
 1. Mowing (regardless of timing) significantly increases drop time. This difference appears to be driven by the early mow treatment, but it's not clear whether late mow shows no effect because there is truly no effect or becasue there are too few data. **Question: Group all mowing together into mowing Y/N or exclude late mow data points?**
 
-2. Warming significantly decreases drop time. [Interaction conclusion]
+2. Warming significantly decreases drop time. But there does not appear to be a significant interaction between the two parameters. 
 
-## Does terminal velocity predicted by seed shape parameters?
+## Terminal Velocity
 
-```{r PreliminaryAnalyses2}
+### Boxplot
+```{r TV_ByTreatment_Boxplot}
+# Warming and mowing vs. TV
+par(mfrow = c(1,2))
+boxplot(data.new$TV ~ data.new$Mow)
+boxplot(data.new$TV ~ data.new$Warming)
+```
+
+### ANOVA: Warming and Mowing Alone
+```{r TV_ByTreatment_ANOVA}
+## ANOVA
+# warming
+mod.warm = lm(TV ~ Warming, data= data.new)
+summary(mod.warm)
+
+# mowYN 
+mod.mowYN = lm(TV ~ MowYN, data= data.new)
+summary(mod.mowYN)
+
+# early vs. late mowing 
+mod.mow = lm(TV ~ Mow, data= data.new)
+summary(mod.mow)
+TukeyHSD(aov(TV ~ Mow, data= data.new))
+```
+
+### ANOVA: Warming and Mowing Multivariate
+```{r TV_ByTreatment_ANOVAInt}
+# interaction (mow YN)
+mod.intYN = lm(TV ~ MowYN + Warming + MowYN:Warming, data= data.new)
+summary(mod.intYN)
+anova(mod.intYN)
+with(data.new, interaction.plot(x.factor = MowYN,Warming,response = TV))
+anova(mod.warm, mod.intYN, lm(TV~MowYN + Warming, data = data.new))
+
+
+# interaction (including E/L mow differentiation)
+mod.int = lm(TV ~ Mow + Warming + Mow:Warming, data= data.new)
+summary(mod.int)
+anova(mod.int)
+with(data.new, interaction.plot(x.factor = Mow,Warming,response = TV))
+
+# partial F test: compare full model to warming only model
+anova(mod.warm, mod.int, lm(TV~Mow + Warming, data = data.new))
+```
+
+Conclusions: 
+
+1. Mowing has weak or no effect on terminal velocity.
+
+2. Warming significantly increases terminal velocity. There may be a weak interaction between late mowing and warmed plants which further increases terminal velocity, though partial F-test does not suggest these terms add more information. 
+
+# Do seed shape parameters change by treatment?
+## Seed Width
+
+### Boxplot
+```{r SeedWidth_ByTreatment_Boxplot}
+# Warming and mowing vs. seedwidth
+par(mfrow = c(1,2))
+boxplot(data.new$SeedWidth ~ data.new$Mow)
+boxplot(data.new$SeedWidth ~ data.new$Warming)
+```
+
+### ANOVA: Warming and Mowing Alone
+```{r SeedWidth_ByTreatment_ANOVA}
+## ANOVA
+# warming
+mod.warm = lm(SeedWidth ~ Warming, data= data.new)
+summary(mod.warm)
+
+# mowYN 
+mod.mowYN = lm(SeedWidth ~ MowYN, data= data.new)
+summary(mod.mowYN)
+
+# early vs. late mowing 
+mod.mow = lm(SeedWidth ~ Mow, data= data.new)
+summary(mod.mow)
+TukeyHSD(aov(SeedWidth ~ Mow, data= data.new))
+```
+
+### ANOVA: Warming and Mowing Multivariate
+```{r SeedWidth_ByTreatment_ANOVAInt}
+# interaction (including E/L mow differentiation)
+mod.int = lm(SeedWidth ~ Mow + Warming + Mow:Warming, data= data.new)
+summary(mod.int)
+anova(mod.int)
+par(mfrow = c(1,1))
+with(data.new, interaction.plot(x.factor = Mow,Warming,response = SeedWidth))
+
+out = HSD.test(aov(SeedWidth ~ Mow + Warming + Mow:Warming, data= data.new), c("Mow","Warming"))
+bar.group(out$groups, ylim = c(0,25), xlab = "Mow", ylab = "Seed Width")
+# partial F test: compare full model to warming only model
+anova(mod.mow, lm(SeedWidth~Mow + Warming, data = data.new), mod.int)
+
+# interaction (excluding E/L mow differentiation)
+mod.intYN = lm(SeedWidth ~ MowYN + Warming + MowYN:Warming, data= data.new)
+summary(mod.intYN)
+anova(mod.intYN)
+par(mfrow = c(1,1))
+with(data.new, interaction.plot(x.factor = MowYN,Warming,response = SeedWidth))
+
+out = HSD.test(aov(SeedWidth ~ MowYN + Warming + MowYN:Warming, data= data.new), c("MowYN","Warming"))
+bar.group(out$groups, ylim = c(0,25), xlab = "MowYN", ylab = "Seed Width")
+# partial F test: compare full model to warming only model
+anova(mod.mow, lm(SeedWidth~MowYN + Warming, data = data.new), mod.intYN)
+```
+
+Conclusions:
+
+1. Seed width is significantly reduced by mowing and warming, though there appears to be an interaction. We see a significant decrease in seed width for plants which are mowed and warmed.
+
+
+## Seed Volume
+
+### Boxplot
+```{r SeedVol_ByTreatment_Boxplot}
+# Warming and mowing vs. average DT
+par(mfrow = c(1,2))
+boxplot(data.new$SeedVol ~ data.new$Mow)
+boxplot(data.new$SeedVol ~ data.new$Warming)
+```
+
+### ANOVA: Warming and Mowing Alone
+```{r SeedVol_ByTreatment_ANOVA}
+## ANOVA
+# warming
+mod.warm = lm(SeedVol ~ Warming, data= data.new)
+summary(mod.warm)
+
+# mowYN 
+mod.mowYN = lm(SeedVol ~ MowYN, data= data.new)
+summary(mod.mowYN)
+
+# early vs. late mowing 
+mod.mow = lm(SeedVol ~ Mow, data= data.new)
+summary(mod.mow)
+TukeyHSD(aov(SeedVol ~ Mow, data= data.new))
+```
+
+### ANOVA: Warming and Mowing Multivariate
+```{r SeedVol_ByTreatment_ANOVAInt}
+# interaction (including E/L mow differentiation)
+mod.int = lm(SeedVol ~ Mow + Warming + Mow:Warming, data= data.new)
+summary(mod.int)
+anova(mod.int)
+par(mfrow = c(1,1))
+with(data.new, interaction.plot(x.factor = Mow,Warming,response = SeedVol))
+
+out = HSD.test(aov(SeedVol ~ Mow + Warming + Mow:Warming, data= data.new), c("Mow","Warming"))
+bar.group(out$groups, ylim = c(0,2000), xlab = "Mow", ylab = "Seed Volume")
+# partial F test: compare full model to warming only model
+anova(mod.mow, lm(SeedVol~Mow + Warming, data = data.new), mod.int)
+
+# interaction (excluding E/L mow differentiation)
+mod.intYN = lm(SeedVol ~ MowYN + Warming + MowYN:Warming, data= data.new)
+summary(mod.intYN)
+anova(mod.intYN)
+par(mfrow = c(1,1))
+with(data.new, interaction.plot(x.factor = MowYN,Warming,response = SeedVol))
+
+out = HSD.test(aov(SeedVol ~ MowYN + Warming + MowYN:Warming, data= data.new), c("MowYN","Warming"))
+bar.group(out$groups, ylim = c(0,2000), xlab = "MowYN", ylab = "Seed Volume")
+# partial F test: compare full model to warming only model
+anova(mod.mow, lm(SeedVol~MowYN + Warming, data = data.new), mod.intYN)
+```
+
+
+Conclusions:
+
+1. The results for seed volume are very similar to those of seed width. Seed volume is decreased by both warming and mowing, though the seeds showing the strongest effect are both warmed and mowed. 
+
+
+## Plant Height
+
+### Boxplot
+```{r PlantHeight_ByTreatment_Boxplot}
+# Warming and mowing vs. average DT
+par(mfrow = c(1,2))
+boxplot(data.new$MaxHeightPostMow ~ data.new$Mow)
+boxplot(data.new$MaxHeightPostMow ~ data.new$Warming)
+
+```
+
+### ANOVA: Warming and Mowing Alone
+```{r PlantHeight_ByTreatment_ANOVA}
+## ANOVA
+# warming
+mod.warm = lm(MaxHeightPostMow ~ Warming, data= data.new)
+summary(mod.warm)
+
+# mowYN 
+mod.mowYN = lm(MaxHeightPostMow ~ MowYN, data= data.new)
+summary(mod.mowYN)
+
+# early vs. late mowing 
+mod.mow = lm(MaxHeightPostMow ~ Mow, data= data.new)
+summary(mod.mow)
+TukeyHSD(aov(MaxHeightPostMow ~ Mow, data= data.new))
+```
+
+### ANOVA: Warming and Mowing Multivariate
+```{r PlantHeight_ByTreatment_ANOVAInt}
+# interaction (including E/L mow differentiation)
+mod.int = lm(MaxHeightPostMow ~ Mow + Warming + Mow:Warming, data= data.new)
+summary(mod.int)
+anova(mod.int)
+par(mfrow = c(1,1))
+with(data.new, interaction.plot(x.factor = Mow,Warming,response = MaxHeightPostMow))
+
+out = HSD.test(aov(MaxHeightPostMow ~ Mow + Warming + Mow:Warming, data= data.new), c("Mow","Warming"))
+bar.group(out$groups, ylim = c(0,90), xlab = "Mow", ylab = "Seed Volume")
+# partial F test: compare full model to warming only model
+anova(mod.mow, lm(MaxHeightPostMow~Mow + Warming, data = data.new), mod.int)
+```
+
+Conclusions:
+
+1. Mowing significantly reduces plant height. Warming allows early mowed plants to reach similar heights as the warmed control plants. There is no significant difference between late mowed plants by warming. Non-mowed ambient plants are taller than non-mowed warmed plants. 
+
+# Is Terminal Velocity predicted by seed shape parameters?
+
+```{r PreliminaryAnalysesTV}
+# Potential Predictors
+pairs(data.new[,c("TV","SeedLength","SeedWidth", "SeedVol","SeedCSA")])
+
+# plot TV vs. seed width by treatment
+ggplot(data = data.new, aes(x = SeedWidth, y = TV, color = Warming))+
+  geom_point()+
+  facet_wrap(data.new$Mow)
+
+# plot TV vs. seed volume by treatment
+ggplot(data = data.new, aes(x = SeedVol, y = TV, color = Warming))+
+  geom_point()+
+  facet_wrap(data.new$Mow)
+
+# plot TV vs. seed CSA by treatment
+ggplot(data = data.new, aes(x = SeedCSA, y = TV, color = Warming))+
+  geom_point()+
+  facet_wrap(data.new$Mow)
+```
+
+
+## Is drop time predicted by seed shape parameters?
+
+```{r PreliminaryAnalysesDT}
 # Potential Predictors
 pairs(data.new[,c("DT.Avg","SeedLength","SeedWidth", "SeedVol","SeedCSA")])
 
@@ -84,7 +368,6 @@ pairs(data.new[,c("DT.Avg","SeedLength","SeedWidth", "SeedVol","SeedCSA")])
 ggplot(data = data.new, aes(x = SeedWidth, y = DT.Avg, color = Warming))+
   geom_point()+
   facet_wrap(data.new$Mow)
-
 ```
 
 ```{r Univariate}
