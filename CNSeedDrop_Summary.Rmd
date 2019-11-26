@@ -16,7 +16,7 @@ library(gridExtra)
 library(agricolae)
 
 #Initialise data
-data <- read.csv("SeedDropData.csv")
+data <- read.csv("https://raw.githubusercontent.com/TrevorHD/CNSeedDrop/master/SeedDropData.csv")
 
 # Add pappus conical volume and maximum cross-sectional area to data
 data %>% mutate(SeedVol = (pi/3)*((SeedWidth/2)^2)*SeedLength,
@@ -32,7 +32,7 @@ data.new$PlotUnique = as.factor(paste(data.new$Block,"_",data.new$Plot))
 # Create a mowing y/n flag
 data.new$MowYN = ifelse(data.new$Mow == "CTL", 0, 1)
 
-# Create TV field from DT (ASSUMING TUBE LENGHT = 1.5m)
+# Create TV field from DT (Assuming drop height of 1.25m)
 data.new$TV = 1.25/data.new$DT.Avg
 
 ```
