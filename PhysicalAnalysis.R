@@ -35,7 +35,7 @@ cor(data.new[, c("TV", "SeedLength", "SeedWidth", "SeedAngle", "SeedArea", "Seed
 
 # Generate full model with all predictors
 mod.full <- lm(TV ~ SeedWidth + SeedLength + SeedWidth:SeedLength + SeedArea + SeedAngle +
-                 SeedHeight + SeedVol, data = data.new)
+                    SeedHeight + SeedVol, data = data.new)
 summary(mod.full)
 
 # VIF is overwhelmingly high
