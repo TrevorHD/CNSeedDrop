@@ -91,9 +91,10 @@ summary(mod.4)
 
 # Also, the fit of the model with only SeedWidth isn't as good:
 plot(TV ~ SeedWidth, data = data.new)
-newdat <- data.frame(SeedWidth = seq(min(data.new$SeedWidth), max(data.new$SeedWidth), length.out = 300))
-newdat$pred = predict(mod.5, newdata = newdat)
-with(newdat, lines(x = SeedWidth, y = pred, col = "red"))
+testdata <- data.frame(SeedWidth = seq(min(data.new$SeedWidth), max(data.new$SeedWidth), length.out = 300))
+testdata$TV = predict(mod.5, newdata = newdat)
+with(testdata, lines(x = SeedWidth, y = TV, col = "red"))
+remove(testdata)
 abline(mod.4, col = "blue")
 
 # If we want to keep only two variables, SeedWidth and SeedArea are the ones we want
@@ -118,9 +119,10 @@ summary(mod.5)
 
 # Model seems to be a decent fit
 plot(TV ~ SeedWidth, data = data.new)
-newdat <- data.frame(SeedWidth = seq(min(data.new$SeedWidth), max(data.new$SeedWidth), length.out = 300))
-newdat$pred = predict(mod.5, newdata = newdat)
-with(newdat, lines(x = SeedWidth, y = pred, col = "red"))
+testdata <- data.frame(SeedWidth = seq(min(data.new$SeedWidth), max(data.new$SeedWidth), length.out = 300))
+testdata$TV = predict(mod.5, newdata = newdat)
+with(testdata, lines(x = SeedWidth, y = TV, col = "red"))
+remove(testdata)
 
 # No discernable pattern in standardised residuals
 plot(rstandard(mod.5) ~ SeedWidth, data = data.new)
