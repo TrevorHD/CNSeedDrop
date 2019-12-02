@@ -83,20 +83,7 @@ vif(mod.3)
 mod.4 <- lm(TV ~ SeedWidth, data = data.new)
 anova(mod.4, mod.3)
 
-# Thus, the model with just the linear term might not be enough
-# The R^2 is significantly lower
-summary(mod.3)
-summary(mod.4)
-
-# Also, the fit of the model with only SeedWidth isn't as good:
-plot(TV ~ SeedWidth, data = data.new)
-testdata <- data.frame(SeedWidth = seq(min(data.new$SeedWidth), max(data.new$SeedWidth), length.out = 300))
-testdata$TV = predict(mod.5, newdata = newdat)
-with(testdata, lines(x = SeedWidth, y = TV, col = "red"))
-remove(testdata)
-abline(mod.4, col = "blue")
-
-# If we want to keep only two variables, SeedWidth and SeedArea are the ones we want
+# If we want to keep only two variables, SeedWidth and SeedArea are indeed the ones we want
 summary(regsubsets(TV ~ SeedWidth + SeedLength + SeedWidth:SeedLength + SeedArea + SeedAngle +
                         SeedHeight + SeedVol, data = data.new))
 
@@ -104,9 +91,17 @@ summary(regsubsets(TV ~ SeedWidth + SeedLength + SeedWidth:SeedLength + SeedArea
 # Given that SeedArea ~ Seedwidth^2, then we can just express it as such and not worry about VIF
 mod.5 <- lm(TV ~ SeedWidth + I(SeedWidth^2), data = data.new)
 
-# Is this model the same as the one with SeedArea?
-# Almost, and ratio of SE/estimate is almost identical for all predictors
-summary(mod.5)
+# The model with just the linear term might not be enough since its R^2 is significantly lower
+summary(mod.3)
+summary(mod.4)
+
+# Also, the fit of the model with only linear SeedWidth isn't as good:
+plot(TV ~ SeedWidth, data = data.new)
+testdata <- data.frame(SeedWidth = seq(min(data.new$SeedWidth), max(data.new$SeedWidth), length.out = 300))
+testdata$TV = predict(mod.5, newdata = newdat)
+with(testdata, lines(x = SeedWidth, y = TV, col = "red"))
+remove(testdata)
+abline(mod.4, col = "blue")
 
 # Thus, mod.5 (SeedWidth and SeedWidth^2) will be the best choice
 
