@@ -12,7 +12,7 @@ data <- read.csv("https://raw.githubusercontent.com/TrevorHD/CNSeedDrop/master/S
 # Also calculate terminal velocity given drop time and fixed drop height
 data %>% mutate(SeedAngle = acos(1 - ((SeedWidth^2)/(2*(SeedLength^2)))),
                 SeedArea = pi*((SeedWidth/2)^2),
-                SeedHeight = sqrt(SeedLength^2 + (SeedWidth/2)^2),
+                SeedHeight = sqrt(SeedLength^2 - (SeedWidth/2)^2),
                 SeedVol = (pi/3)*((SeedWidth/2)^2)*SeedHeight,
                 TV = 1.25/DT.Avg) -> data
 
@@ -48,17 +48,16 @@ vif(mod.full)
 ##### Variable selection ----------------------------------------------------------------------------------
 
 # Backward elimination, no AIC or BIC; remove "worst" predictor
-mod.1 <- update(mod.full, . ~ . - SeedVol)
+mod.1 <- update(mod.full, . ~ . - SeedWidth:SeedLength)
 summary(mod.1)
-mod.1 <- update(mod.1, . ~ . - SeedLength)
+mod.1 <- update(mod.1, . ~ . - SeedAngle)
 summary(mod.1)
-mod.1 <- update(mod.1, . ~ . - SeedHeight)
+mod.1 <- update(mod.1, . ~ . - SeedArea)
 summary(mod.1)
 
 # Backward elimination with AIC
 step(mod.full, direction = "backward", data = data.new)
-mod.2 <- lm(TV ~ SeedWidth + SeedLength + SeedArea + SeedAngle + SeedWidth:SeedLength, 
-                 data = data.new)
+mod.2 <- lm(TV ~ SeedWidth + SeedLength + SeedHeight + SeedVol, data = data.new)
 summary(mod.2)
 mod.2 <- update(mod.2, . ~ . - SeedLength)
 summary(mod.2)
@@ -71,7 +70,7 @@ step(mod.null, direction = "forward", scope = list(lower = mod.null, upper = mod
 mod.3 <- lm(TV ~ SeedWidth + SeedArea, data = data.new)
 summary(mod.3)
 
-# Models 1 and 2 are the same, but all predictors have incredibly high VIF
+# Models 1 and 2 are the same, but all predictors have high VIF
 vif(mod.1)
 vif(mod.2)
 
