@@ -136,9 +136,6 @@ ggplot(data = barplot.dat, aes(Mowing, Mean, fill = Warming))+
   labs(y = "Terminal Velocity")+
   theme_bw()+
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())
-
-barplot(height = barplot.dat$Mean, )
-
 ```
 
 ### ANOVA: Warming and Mowing Alone
@@ -185,7 +182,7 @@ mowWarm.dat = do.call(data.frame, mowWarm.dat)
 ggplot(data = mowWarm.dat, aes(x = Mow, color = Warming))+
   geom_point(aes(y = fit), position = position_dodge(0.5), size = 2, shape = 15)+
   geom_errorbar(aes(ymin = lwr, ymax = upr), width = 0.2, position = position_dodge(0.5))+
-  labs(y = "Estimate Terminal Velocity")+
+  labs(y = "Estimated Terminal Velocity")+
   theme_bw()+
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())
 
