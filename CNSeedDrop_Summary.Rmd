@@ -14,6 +14,7 @@ library(tidyverse)
 library(ggplot2)
 library(gridExtra)
 library(agricolae)
+library(MASS)
 
 #Initialise data
 data <- read.csv("https://raw.githubusercontent.com/TrevorHD/CNSeedDrop/master/SeedDropData.csv")
@@ -173,12 +174,6 @@ mowWarm.dat = cbind(mowWarm.dat, predict(mod.mowWarm, newdata = mowWarm.dat, int
 mowWarm.dat = do.call(data.frame, mowWarm.dat)
 
 
-mod.mowWarm.log = lm(log(TV) ~ Mow + Warming, data = data.new)
-summary(mod.mowWarm.log)
-mowWarm.dat = expand.grid(Mow = c("CTL", "E", "L"), Warming = c("A", "W"))
-mowWarm.dat = cbind(mowWarm.dat, predict(mod.mowWarm.log, newdata = mowWarm.dat, interval = "confidence"))
-mowWarm.dat = do.call(data.frame, mowWarm.dat)
-
 ggplot(data = mowWarm.dat, aes(x = Mow, color = Warming))+
   geom_point(aes(y = fit), position = position_dodge(0.5), size = 2, shape = 15)+
   geom_errorbar(aes(ymin = lwr, ymax = upr), width = 0.2, position = position_dodge(0.5))+
@@ -196,6 +191,39 @@ with(data.new, interaction.plot(x.factor = Mow,Warming,response = TV))
 anova(mod.warm, mod.mowWarm, mod.int)
 ```
 
+```{r TV_ByTreatment_ANOVAInt_log}
+# warming
+mod.warm.log = lm(log(TV) ~ Warming, data= data.new)
+summary(mod.warm.log)
+
+# early vs. late mowing 
+mod.mow.log = lm(log(TV) ~ Mow, data= data.new)
+summary(mod.mow.log)
+TukeyHSD(aov(log(TV) ~ Mow, data= data.new))
+
+# no interaction (E/L mow)
+mod.mowWarm.log = lm(log(TV) ~ Mow + Warming, data = data.new)
+summary(mod.mowWarm.log)
+mowWarm.dat = expand.grid(Mow = c("CTL", "E", "L"), Warming = c("A", "W"))
+mowWarm.dat = cbind(mowWarm.dat, predict(mod.mowWarm.log, newdata = mowWarm.dat, interval = "confidence"))
+mowWarm.dat = do.call(data.frame, mowWarm.dat)
+
+ggplot(data = mowWarm.dat, aes(x = Mow, color = Warming))+
+  geom_point(aes(y = fit), position = position_dodge(0.5), size = 2, shape = 15)+
+  geom_errorbar(aes(ymin = lwr, ymax = upr), width = 0.2, position = position_dodge(0.5))+
+  labs(y = "Estimated log(Terminal Velocity)")+
+  theme_bw()+
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())
+
+mod.int.log = lm(log(TV) ~ Mow + Warming + Mow:Warming, data= data.new)
+summary(mod.int.log)
+anova(mod.int.log)
+with(data.new, interaction.plot(x.factor = Mow,Warming,response = TV))
+
+# partial F test: compare full model to warming only model
+anova(mod.warm.log, mod.mowWarm.log, mod.int.log)
+```
+
 Conclusions: 
 
 1. Mowing has weak or no effect on terminal velocity.
@@ -211,6 +239,35 @@ Conclusions:
 par(mfrow = c(1,2))
 boxplot(data.new$SeedWidth ~ data.new$Mow)
 boxplot(data.new$SeedWidth ~ data.new$Warming)
+
+barplot.dat = aggregate(data.new$SeedWidth, by = list(Mowing = data.new$Mow, Warming = data.new$Warming), FUN = function(x) c(mean(x),sd = sd(x), n = length(x)))
+barplot.dat = do.call(data.frame, barplot.dat)
+barplot.dat$SE = barplot.dat$x.sd / sqrt(barplot.dat$x.n)
+colnames(barplot.dat) = c("Mowing", "Warming", "Mean", "SD", "n", "SE")
+
+ggplot(data = barplot.dat, aes(Mowing, Mean, fill = Warming))+
+  geom_bar(stat = "identity", position = position_dodge(0.9))+
+  geom_point(data = data.new, aes(x = Mow, group = Warming, y = SeedWidth), position = position_jitterdodge(dodge.width = 0.9), alpha = 0.5, shape = 16)+
+  geom_errorbar(aes(ymin = Mean - SE, ymax = Mean + SE), width = 0.2, position = position_dodge(0.9))+
+  labs(y = "Seed Width")+
+  theme_bw()+
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())
+
+
+barplot.dat = aggregate(data.new$SeedWidth, by = list(Mowing = data.new$MowYN, Warming = data.new$Warming), FUN = function(x) c(mean(x),sd = sd(x), n = length(x)))
+barplot.dat = do.call(data.frame, barplot.dat)
+barplot.dat$SE = barplot.dat$x.sd / sqrt(barplot.dat$x.n)
+colnames(barplot.dat) = c("Mowing", "Warming", "Mean", "SD", "n", "SE")
+barplot.dat$Mowing = ifelse(barplot.dat$Mowing == 1, "Y","N")
+
+ggplot(data = barplot.dat, aes(Mowing, Mean, fill = Warming))+
+  geom_bar(stat = "identity", position = position_dodge(0.9))+
+  geom_point(data = data.new, aes(x = ifelse(MowYN == 1, "Y", "N"), group = Warming, y = SeedWidth), position = position_jitterdodge(dodge.width = 0.9), alpha = 0.5, shape = 16)+
+  geom_errorbar(aes(ymin = Mean - SE, ymax = Mean + SE), width = 0.2, position = position_dodge(0.9))+
+  labs(y = "Seed Width")+
+  theme_bw()+
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())
+
 ```
 
 ### ANOVA: Warming and Mowing Alone
@@ -232,17 +289,37 @@ TukeyHSD(aov(SeedWidth ~ Mow, data= data.new))
 
 ### ANOVA: Warming and Mowing Multivariate
 ```{r SeedWidth_ByTreatment_ANOVAInt}
+# both warming and mowing
+mod.mowWarm = lm(SeedWidth ~ Mow + Warming, data= data.new)
+summary(mod.mowWarm)
+
+SeedWidth.dat = expand.grid(Mow = c("CTL", "E", "L"), Warming = c("A", "W"))
+SeedWidth.dat = cbind(SeedWidth.dat, predict(mod.mowWarm, newdata = SeedWidth.dat, interval = "confidence"))
+SeedWidth.dat = do.call(data.frame, SeedWidth.dat)
+
+ggplot(data = SeedWidth.dat, aes(x = Mow, color = Warming))+
+  geom_point(aes(y = fit), position = position_dodge(0.5), size = 2, shape = 15)+
+  geom_errorbar(aes(ymin = lwr, ymax = upr), width = 0.2, position = position_dodge(0.5))+
+  labs(y = "Estimated Seed Width")+
+  theme_bw()+
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())
+
+
 # interaction (including E/L mow differentiation)
 mod.int = lm(SeedWidth ~ Mow + Warming + Mow:Warming, data= data.new)
 summary(mod.int)
 anova(mod.int)
 par(mfrow = c(1,1))
 with(data.new, interaction.plot(x.factor = Mow,Warming,response = SeedWidth))
-
 out = HSD.test(aov(SeedWidth ~ Mow + Warming + Mow:Warming, data= data.new), c("Mow","Warming"))
-bar.group(out$groups, ylim = c(0,25), xlab = "Mow", ylab = "Seed Width")
+bar.group(out$groups, ylim = c(0,25), xlab = "Mowing", ylab = "Seed Width", main = "Tukey HSD")
 # partial F test: compare full model to warming only model
-anova(mod.mow, lm(SeedWidth~Mow + Warming, data = data.new), mod.int)
+anova(mod.mow, mod.mowWarm, mod.int)
+
+
+# both warming and mowing YN
+mod.mowWarmYN = lm(SeedWidth ~ MowYN + Warming, data= data.new)
+summary(mod.mowWarmYN)
 
 # interaction (excluding E/L mow differentiation)
 mod.intYN = lm(SeedWidth ~ MowYN + Warming + MowYN:Warming, data= data.new)
@@ -251,10 +328,26 @@ anova(mod.intYN)
 par(mfrow = c(1,1))
 with(data.new, interaction.plot(x.factor = MowYN,Warming,response = SeedWidth))
 
+SeedWidth.dat = expand.grid(MowYN = c(0,1), Warming = c("A", "W"))
+SeedWidth.dat$Mowing = ifelse(SeedWidth.dat$MowYN == 1, "Y", "N")
+SeedWidth.dat = cbind(SeedWidth.dat, predict(mod.intYN, newdata = SeedWidth.dat, interval = "confidence"))
+SeedWidth.dat = do.call(data.frame, SeedWidth.dat)
+
+ggplot(data = SeedWidth.dat, aes(x = Mowing, color = Warming))+
+  geom_point(aes(y = fit), position = position_dodge(0.5), size = 2, shape = 15)+
+  geom_errorbar(aes(ymin = lwr, ymax = upr), width = 0.2, position = position_dodge(0.5))+
+  labs(y = "Estimated Seed Width")+
+  theme_bw()+
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())
+
 out = HSD.test(aov(SeedWidth ~ MowYN + Warming + MowYN:Warming, data= data.new), c("MowYN","Warming"))
-bar.group(out$groups, ylim = c(0,25), xlab = "MowYN", ylab = "Seed Width")
+bar.group(out$groups, ylim = c(0,25), xlab = "MowYN", ylab = "Seed Width", main = "Tukey HSD")
 # partial F test: compare full model to warming only model
-anova(mod.mow, lm(SeedWidth~MowYN + Warming, data = data.new), mod.intYN)
+anova(mod.mowYN, lm(SeedWidth~MowYN + Warming, data = data.new), mod.intYN)
+
+stepAIC(mod.int, direction = "both")
+stepAIC(mod.int, direction = "backward")
+
 ```
 
 Conclusions:
