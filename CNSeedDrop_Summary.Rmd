@@ -123,6 +123,22 @@ Conclusions:
 par(mfrow = c(1,2))
 boxplot(data.new$TV ~ data.new$Mow)
 boxplot(data.new$TV ~ data.new$Warming)
+
+barplot.dat = aggregate(data.new$TV, by = list(Mowing = data.new$Mow, Warming = data.new$Warming), FUN = function(x) c(mean(x),sd = sd(x), n = length(x)))
+barplot.dat = do.call(data.frame, barplot.dat)
+barplot.dat$SE = barplot.dat$x.sd / sqrt(barplot.dat$x.n)
+colnames(barplot.dat) = c("Mowing", "Warming", "Mean", "SD", "n", "SE")
+
+ggplot(data = barplot.dat, aes(Mowing, Mean, fill = Warming))+
+  geom_bar(stat = "identity", position = position_dodge(0.9))+
+  geom_point(data = data.new, aes(x = Mow, group = Warming, y = TV), position = position_jitterdodge(dodge.width = 0.9), alpha = 0.5, shape = 16)+
+  geom_errorbar(aes(ymin = Mean - SE, ymax = Mean + SE), width = 0.2, position = position_dodge(0.9))+
+  labs(y = "Terminal Velocity")+
+  theme_bw()+
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())
+
+barplot(height = barplot.dat$Mean, )
+
 ```
 
 ### ANOVA: Warming and Mowing Alone
@@ -140,6 +156,7 @@ summary(mod.mowYN)
 mod.mow = lm(TV ~ Mow, data= data.new)
 summary(mod.mow)
 TukeyHSD(aov(TV ~ Mow, data= data.new))
+
 ```
 
 ### ANOVA: Warming and Mowing Multivariate
@@ -149,8 +166,28 @@ mod.intYN = lm(TV ~ MowYN + Warming + MowYN:Warming, data= data.new)
 summary(mod.intYN)
 anova(mod.intYN)
 with(data.new, interaction.plot(x.factor = MowYN,Warming,response = TV))
-anova(mod.warm, mod.intYN, lm(TV~MowYN + Warming, data = data.new))
+anova(mod.warm, lm(TV~MowYN + Warming, data = data.new), mod.intYN)
 
+# no interaction (E/L mow)
+mod.mowWarm = lm(TV ~ Mow + Warming, data = data.new)
+summary(mod.mowWarm)
+mowWarm.dat = expand.grid(Mow = c("CTL", "E", "L"), Warming = c("A", "W"))
+mowWarm.dat = cbind(mowWarm.dat, predict(mod.mowWarm, newdata = mowWarm.dat, interval = "confidence"))
+mowWarm.dat = do.call(data.frame, mowWarm.dat)
+
+
+mod.mowWarm.log = lm(log(TV) ~ Mow + Warming, data = data.new)
+summary(mod.mowWarm.log)
+mowWarm.dat = expand.grid(Mow = c("CTL", "E", "L"), Warming = c("A", "W"))
+mowWarm.dat = cbind(mowWarm.dat, predict(mod.mowWarm.log, newdata = mowWarm.dat, interval = "confidence"))
+mowWarm.dat = do.call(data.frame, mowWarm.dat)
+
+ggplot(data = mowWarm.dat, aes(x = Mow, color = Warming))+
+  geom_point(aes(y = fit), position = position_dodge(0.5), size = 2, shape = 15)+
+  geom_errorbar(aes(ymin = lwr, ymax = upr), width = 0.2, position = position_dodge(0.5))+
+  labs(y = "Estimate Terminal Velocity")+
+  theme_bw()+
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())
 
 # interaction (including E/L mow differentiation)
 mod.int = lm(TV ~ Mow + Warming + Mow:Warming, data= data.new)
@@ -159,7 +196,7 @@ anova(mod.int)
 with(data.new, interaction.plot(x.factor = Mow,Warming,response = TV))
 
 # partial F test: compare full model to warming only model
-anova(mod.warm, mod.int, lm(TV~Mow + Warming, data = data.new))
+anova(mod.warm, mod.mowWarm, mod.int)
 ```
 
 Conclusions: 
