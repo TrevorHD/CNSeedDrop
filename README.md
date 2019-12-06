@@ -4,6 +4,12 @@ Here, we analyse how various factors such as seed pappus dimensions affect the d
 
 # Files
 
+**PreliminaryAnalysis** *(folder)* - Contains graphical output from some of the analyses.
+
+**PreliminaryAnalysis** *(.R)* - R code to perform very basic preliminary analyses of the data.
+
+**PhysicalAnalysis** *(.R)* - R code to analyse how physical properties regarding seed shaper affect its terminal velocity.
+
 **CNSeedDrop_Summary** *(.Rmd)* - R markdown code used to generate a report of the data analysis.
 
 **CNSeedDrop_Summary** *(.pdf)* - The report containing the data analysis, including relevant figures.
