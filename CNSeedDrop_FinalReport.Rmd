@@ -1,0 +1,159 @@
+---
+title: "Final Project Report"
+author: "Trevor Drees and Emily Howerton"
+date: "December 15, 2019"
+output:
+  pdf_document:
+    fig_caption: yes
+    fig_crop: no
+    fig_height: 4
+    fig_width: 5
+editor_options: 
+  chunk_output_type: console
+header-includes:
+- \usepackage{float}
+- \usepackage[width=0.8\textwidth]{caption}
+
+---
+
+```{r setup, include = FALSE}
+# Load packages
+library(knitr)
+library(tidyverse)
+library(ggplot2)
+library(gridExtra)
+library(agricolae)
+library(MASS)
+
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, fig.pos = 'H')
+
+
+
+#Initialise data
+data <- read.csv("SeedDropData.csv")
+
+# Add pappus conical volume and maximum cross-sectional area to data
+data %>% mutate(SeedVol = (pi/3)*((SeedWidth/2)^2)*SeedLength,
+                SeedCSA = pi*((SeedWidth/2)^2)) -> data
+
+# Create new data set that excludes instances where pappus length, width, or DT are NA
+data.new <- data[complete.cases(data[ , 23:25]), ]
+
+# Need unique plot indicators by block - plot 1 and plot 2 are not similar in any way across blocks
+data.new$PlotUnique = as.factor(paste(data.new$Block,"_",data.new$Plot))
+# use PlantID for position
+
+# Create a mowing y/n flag
+data.new$MowYN = ifelse(data.new$Mow == "CTL", 0, 1)
+
+# Create TV field from DT (Assuming drop height of 1.25m)
+data.new$TV = 1.25/data.new$DT.Avg
+
+```
+
+# Abstract
+
+# Introduction and Data
+
+[introduction on thistle/dispersal/tv]
+
+The data was collected during a field experiment which crossed warming and mowing treatments.  There were ten blocks, where each block subset into two plots - one warmed treatment and one ambient. Within a plot there are three positions, one for each mowing treatment. Ten seeds were planted at each position. One flower head was harvested from all individuals that survived to harvest date. Seeds were
+collected from individual flower heads and subsequently tested in a drop chamber. Seed drop tests were repeated until two drop times were recorded within 0.1 seconds. With these data, we want to assess the variation in drop time of seeds from plants under warming and/or mowing.
+
+With this data, we will address three main research questions:
+
+
+\begin{enumerate}
+\item Is seed terminal velocity predicted by seed shape parameters?
+\item To what extent do warming and mowing treatments change seed terminal velocity?
+\item Can changes in terminal velocity by treatment be explained by changes in seed shape parameters?
+\end{enumerate}
+
+# Research Question 1 
+
+# Research Question 2
+
+```{r TVbarplot,fig.cap="\\label{fig:TVbarplot}Terminal velocity for plants grown under warming and mowing treatments. Height of bar shows group mean, and error bars show one standard error. Actual data shown with black dots."}
+barplot.dat = aggregate(data.new$TV, by = list(Mowing = data.new$Mow, Warming = data.new$Warming), FUN = function(x) c(mean(x),sd = sd(x), n = length(x)))
+barplot.dat = do.call(data.frame, barplot.dat)
+barplot.dat$SE = barplot.dat$x.sd / sqrt(barplot.dat$x.n)
+colnames(barplot.dat) = c("Mowing", "Warming", "Mean", "SD", "n", "SE")
+
+ggplot(data = barplot.dat, aes(Mowing, Mean, fill = Warming))+
+  geom_bar(stat = "identity", position = position_dodge(0.9))+
+  geom_point(data = data.new, aes(x = Mow, group = Warming, y = TV), position = position_jitterdodge(dodge.width = 0.9), alpha = 0.5, shape = 16)+
+  geom_errorbar(aes(ymin = Mean - SE, ymax = Mean + SE), width = 0.2, position = position_dodge(0.9))+
+  labs(y = "Terminal Velocity")+
+  theme_bw()+
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())
+```
+
+```{r TVHistAndErrors,fig.cap="\\label{fig:TVHistAndErrors} Justification for transofmraiton of terminal velocity. Histogram of terminal velocity (A) and Normal-QQ plot of linear model, with both warming and mowing predictors."}
+
+# show TV histogram
+p1 = ggplot(data = data.new)+
+  geom_histogram(aes(TV), fill = "white", color = "black", bins = 10)+
+  theme_bw()+
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())+
+  labs(x = "Terminal Velocity", y = "Count", tag = "A")
+# show residuals 
+mod.TV = lm(TV ~ Warming + Mow, data = data.new)
+resid = as.data.frame(mod.TV$residuals)
+colnames(resid) = c("Residuals")
+p2 = ggplot(resid, aes(sample = Residuals))+
+  stat_qq() + 
+  stat_qq_line()+
+  theme_bw()+
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())+
+  labs(x = "Theoretical", y = "Sample", tag = "B")
+grid.arrange(p1, p2, nrow = 1)
+
+```
+
+```{r TV_ByTreatment_ANOVA_log, include = FALSE}
+fit.TV = lm(log(TV) ~ Warming * Mow, data = data.new)
+fit.TV.AIC = stepAIC(fit.TV)
+
+# warming
+mod.warm.log = lm(log(TV) ~ Warming, data= data.new)
+summary(mod.warm.log)
+
+# early vs. late mowing 
+mod.mow.log = lm(log(TV) ~ Mow, data= data.new)
+summary(mod.mow.log)
+TukeyHSD(aov(log(TV) ~ Mow, data= data.new))
+
+# no interaction (E/L mow)
+mod.mowWarm.log = lm(log(TV) ~ Mow + Warming, data = data.new)
+summary(mod.mowWarm.log)
+
+mod.int.log = lm(log(TV) ~ Mow + Warming + Mow:Warming, data= data.new)
+summary(mod.int.log)
+anova(mod.int.log)
+
+# partial F test: compare full model to warming only model
+anova(mod.warm.log, mod.mowWarm.log, mod.int.log)
+```
+
+```{r TV_ANOVATrtEst, fig.cap="\\label{fig:TV_ANOVATrtEst}Results of best fitting ANOVA model, which included both warming and mowing as predictors. Square dots show mean predicted value and error bars show 95% confidence intervals."}
+mowWarm.dat = expand.grid(Mow = c("CTL", "E", "L"), Warming = c("A", "W"))
+mowWarm.dat = cbind(mowWarm.dat, predict(mod.mowWarm.log, newdata = mowWarm.dat, interval = "confidence"))
+mowWarm.dat = do.call(data.frame, mowWarm.dat)
+
+ggplot(data = mowWarm.dat, aes(x = Mow, color = Warming))+
+  geom_point(aes(y = fit), position = position_dodge(0.5), size = 2, shape = 15)+
+  geom_errorbar(aes(ymin = lwr, ymax = upr), width = 0.2, position = position_dodge(0.5))+
+  labs(y = "Estimated log(Terminal Velocity)")+
+  theme_bw()+
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())
+```
+
+The following analysis will quantify the extent to which seed terminal velocity changed under warming and mowing treatments. Figure \ref{fig:TVbarplot} shows the mean of each treatment. There are fewer points for late mowed plants, as many of them died due to the mowing treatment. To assess whether warming and mowing treatment significantly changed terminal velocity we used ANOVA models. We log-transformed terminal velocity to compensate for skewed right distribution of the terminal velocity data and sinificant deviations from error normality (Figure \ref{fig:TVHistAndErrors}). 
+
+Using log-transformed terminal velocity, we use two methods to identify what is the most appropriate model to describe changes in terminal velocity based on the treatments.
+
+# Research Question 3
+
+
+
+# Discussion
