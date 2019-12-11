@@ -13,7 +13,6 @@ editor_options:
 header-includes:
 - \usepackage{float}
 - \usepackage[width=0.8\textwidth]{caption}
-
 ---
 
 ```{r setup, include = FALSE}
@@ -24,6 +23,7 @@ library(ggplot2)
 library(gridExtra)
 library(agricolae)
 library(MASS)
+library(maditr)
 
 knitr::opts_chunk$set(echo = FALSE, warning = FALSE, fig.pos = 'H')
 
@@ -110,10 +110,40 @@ grid.arrange(p1, p2, nrow = 1)
 
 ```
 
-```{r TV_ByTreatment_ANOVA_log, include = FALSE}
+```{r TV_ModelSelection, include = FALSE}
 fit.TV = lm(log(TV) ~ Warming * Mow, data = data.new)
-fit.TV.AIC = stepAIC(fit.TV)
+fitTV.select = list()
+#AIC
+fitTV.select$AICBoth = stepAIC(fit.TV, direction = "both")
+fitTV.select$AICBackward = stepAIC(fit.TV, direction =  "backward")
+fitTV.select$AICForward = stepAIC(lm(log(TV)~1, data = data.new), direction =  "forward")
+#BIC
+fitTV.select$BICBoth = stepAIC(fit.TV, direction = "both", k = log(length(data.new)))
+fitTV.select$BICBackward = stepAIC(fit.TV, direction =  "backward", k = log(length(data.new)))
+fitTV.select$BICForward = stepAIC(lm(log(TV)~1, data = data.new), direction =  "forward", k = log(length(data.new)))
+```
 
+```{r TV_ModelSelectionTable, fig.cap="\\label{fig:TV_ModelSelectionTable}CAPTION"}
+# results of model selection
+TV.selection = expand.grid(Variable = c("(Intercept)","MowE","WarmingW", "WarmingW:MowE"), Method = c("AICForward", "AICBackward", "AICBoth", "BICForward", "BICBackward", "BICBoth"))
+#TV.selection$Method = c("AIC: Forward", "AIC: Backward", "AIC: Bi-directional", "BIC: Forward", "BIC: Backward", "BIC: Bi-directional")
+#TV.selection$Variable = c("Intercept","Warming", "Mowing", "Warming:MowE")
+TV.selection$Included = NA
+
+for(i in TV.selection$Method){
+  for(j in TV.selection$Variable){
+   TV.selection$Included[TV.selection$Method == i & TV.selection$Variable == j] = ifelse( j %in% names(fitTV.select[[i]][["coefficients"]]), 1,0 )
+  }
+}
+TV.selection$id <- rep(1:4,times = 6)
+TV.selection = dcast(data = TV.selection,formula = Variable~Method,fun.aggregate = sum,value.var = "Included")
+#TV.selection[,2:7] = ifelse(TV.selection[,2:7] == 1, "Y", "")
+TV.selection[,1] = c("Intercept","Mowing","Warming","Warming:Mowing")
+colnames(TV.selection) = c("Variable", "AIC: Forward", "AIC: Backward", "AIC: Both", "BIC: Forward", "BIC: Backward", "BIC: Both")
+kable(TV.selection)
+```
+
+```{r ByTreatment_ANOVA_log, include = FALSE}
 # warming
 mod.warm.log = lm(log(TV) ~ Warming, data= data.new)
 summary(mod.warm.log)
