@@ -212,6 +212,8 @@ abline(h = c(-2, 2), col = "red", lty = 3)
 
 # Research Question 2
 
+Not only are we interested in predicting seed terminal velocity based on the physical properties of the seed, we are also interested in quantifying the extent to which two environmental variables, warming and mowing, affect seed terminal velocity.  Figure \ref{fig:TVbarplot} shows variation in termnal velocity across all six treatments. Using this plot, we can generate a preliminary hypothesis that warming increases terminal velocity, while mowing decreases it. The following analyses will determine whether such differences are statistically significant. As we can also see in Figure \ref{fig:TVbarplot}, there are fewer points for late mowed plants, as many of them died due to mowing late in the life cycle of the plant.  
+
 ```{r TVbarplot,fig.cap="\\label{fig:TVbarplot}Terminal velocity for plants grown under warming and mowing treatments. Height of bar shows group mean, and error bars show one standard error. Actual data shown with black dots."}
 barplot.dat = aggregate(data.new$TV, by = list(Mowing = data.new$Mow, Warming = data.new$Warming), FUN = function(x) c(mean(x),sd = sd(x), n = length(x)))
 barplot.dat = do.call(data.frame, barplot.dat)
@@ -227,7 +229,10 @@ ggplot(data = barplot.dat, aes(Mowing, Mean, fill = Warming))+
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())
 ```
 
-```{r TVHistAndErrors,fig.cap="\\label{fig:TVHistAndErrors} Justification for transofmraiton of terminal velocity. Histogram of terminal velocity (A) and Normal-QQ plot of linear model, with both warming and mowing predictors."}
+
+Because we are fitting a continutous response variable to categorical predictor variables, we will use an ANOVA model to characterize changes in terminal velocity by treatmnet.We log-transformed terminal velocity to compensate for skewed right distribution of the terminal velocity data and significant deviations from error normality, as seen in Figure \ref{fig:TVHistAndErrors}. 
+
+```{r TVHistAndErrors,fig.cap="\\label{fig:TVHistAndErrors} Justification for transofmraiton of terminal velocity. Histogram of terminal velocity (A) and Normal-QQ plot of linear model with both warming and mowing predictors (B)."}
 
 # show TV histogram
 p1 = ggplot(data = data.new)+
@@ -249,6 +254,50 @@ grid.arrange(p1, p2, nrow = 1)
 
 ```
 
+
+Using log-transformed terminal velocity, we use two methods to identify the most appropriate model. First, we fit the following four models:
+
+\begin{itemize}
+\item Mowing Only: $Terminal Velcotiy = \beta_0 + \beta_1 Mow$
+\item Warming Only: $Terminal Velocity = \beta_0  + \beta_1 Warm$
+\item Warming and Mowing: $Terminal Velocity = \beta_0 + \beta_1 Mow+ \beta_2  Warm$
+\item Interaction: $Terminal Velocity = \beta_0 + \beta_1 Mow+ \beta_2 Warm + \beta_3 Warm \cdot Mow $
+\end{itemize}
+
+We used model p-values for the Mowing and Warming only models to establish which provided a better fit for the data. Then, using this better fitting model as a base, we performed a partial F-test to identify whether adding additional variables to the model significantly improved model fit.
+
+```{r ByTreatment_ANOVA_log, include = FALSE}
+# warming
+mod.warm.log = lm(log(TV) ~ Warming, data= data.new)
+summary(mod.warm.log)
+F.warm = summary((mod.warm.log))$fstatistic
+
+# early vs. late mowing 
+mod.mow.log = lm(log(TV) ~ Mow, data= data.new)
+summary(mod.mow.log)
+F.mow = summary((mod.mow.log))$fstatistic
+
+# no interaction (E/L mow)
+mod.mowWarm.log = lm(log(TV) ~ Mow + Warming, data = data.new)
+summary(mod.mowWarm.log)
+
+# interaction (E/L mow)
+mod.int.log = lm(log(TV) ~ Mow + Warming + Mow:Warming, data= data.new)
+summary(mod.int.log)
+#anova(mod.int.log)
+
+```
+
+Here, the warming only model has a p-value of ```r round( pf(F.warm[1],F.warm[2],F.warm[3],lower.tail=F),4)``` whereas the mowing only model has a p-value of ```r  round(pf(F.mow[1],F.mow[2],F.mow[3],lower.tail=F),4)```. Therefore, we use the warming only model as the base model in our partial F-test. Results, shown in the table below, suggest that the model with both mowing and warming, but no interaction term is the best fit for the data. 
+
+```{r TV_ANOVAResults}
+tab.dat = anova(mod.warm.log, mod.mowWarm.log, mod.int.log)
+tab.dat = data.frame(Model = c("Warming", "Mowing and Warming", "Interaction"), "P-Value" = round(tab.dat[,"Pr(>F)"],4))
+kable(tab.dat)
+```
+
+To validate these model selection results, we also performed model selection with both AIC and BIC; the results are shown in the table below. 
+
 ```{r TV_ModelSelection, include = FALSE}
 fit.TV = lm(log(TV) ~ Warming * Mow, data = data.new)
 fitTV.select = list()
@@ -269,40 +318,29 @@ TV.selection = expand.grid(Variable = c("(Intercept)","MowE","WarmingW", "Warmin
 #TV.selection$Variable = c("Intercept","Warming", "Mowing", "Warming:MowE")
 TV.selection$Included = NA
 
+AIC = rep(NA, length = length(unique(TV.selection$Method)))
 for(i in TV.selection$Method){
   for(j in TV.selection$Variable){
-   TV.selection$Included[TV.selection$Method == i & TV.selection$Variable == j] = ifelse( j %in% names(fitTV.select[[i]][["coefficients"]]), 1,0 )
+    #browser()
+    TV.selection$Included[TV.selection$Method == i & TV.selection$Variable == j] = ifelse( j %in% names(fitTV.select[[i]][["coefficients"]]), 1,0 )
   }
+  AIC[which(unique(TV.selection$Method) == i)] = AIC(fitTV.select[[i]])
 }
+
 TV.selection$id <- rep(1:4,times = 6)
 TV.selection = dcast(data = TV.selection,formula = Variable~Method,fun.aggregate = sum,value.var = "Included")
-#TV.selection[,2:7] = ifelse(TV.selection[,2:7] == 1, "Y", "")
+###FIX THIS###
+#TV.selection = rbind(TV.selection, as.matrix(c("",round(AIC),4),nrow = 1))
+#TV.selection[,-c(1)] = ifelse(TV.selection[,-c(1)] == 1, "Y", "")
 TV.selection[,1] = c("Intercept","Mowing","Warming","Warming:Mowing")
 colnames(TV.selection) = c("Variable", "AIC: Forward", "AIC: Backward", "AIC: Both", "BIC: Forward", "BIC: Backward", "BIC: Both")
+
 kable(TV.selection)
 ```
 
-```{r ByTreatment_ANOVA_log, include = FALSE}
-# warming
-mod.warm.log = lm(log(TV) ~ Warming, data= data.new)
-summary(mod.warm.log)
+Backward and bi-directional selection for AIC and BIC support the warmign and mowing model, though forward selection suggests an intercept only model in both cases of AIC and BIC. 
 
-# early vs. late mowing 
-mod.mow.log = lm(log(TV) ~ Mow, data= data.new)
-summary(mod.mow.log)
-TukeyHSD(aov(log(TV) ~ Mow, data= data.new))
-
-# no interaction (E/L mow)
-mod.mowWarm.log = lm(log(TV) ~ Mow + Warming, data = data.new)
-summary(mod.mowWarm.log)
-
-mod.int.log = lm(log(TV) ~ Mow + Warming + Mow:Warming, data= data.new)
-summary(mod.int.log)
-anova(mod.int.log)
-
-# partial F test: compare full model to warming only model
-anova(mod.warm.log, mod.mowWarm.log, mod.int.log)
-```
+Thus, based on the results of the partial F-test and AIC/BIC model selection, we conclude that $Terminal Velocity = \beta_0 + \beta_1 Mowing+ \beta_2  Warming$ is the best model for our data. The results of this model are shown in __ and treatment level predictions are shown in Figure \ref{fig:TV_ANOVATrtEst}.
 
 ```{r TV_ANOVATrtEst, fig.cap="\\label{fig:TV_ANOVATrtEst}Results of best fitting ANOVA model, which included both warming and mowing as predictors. Square dots show mean predicted value and error bars show 95% confidence intervals."}
 mowWarm.dat = expand.grid(Mow = c("CTL", "E", "L"), Warming = c("A", "W"))
@@ -317,9 +355,7 @@ ggplot(data = mowWarm.dat, aes(x = Mow, color = Warming))+
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())
 ```
 
-The following analysis will quantify the extent to which seed terminal velocity changed under warming and mowing treatments. Figure \ref{fig:TVbarplot} shows the mean of each treatment. There are fewer points for late mowed plants, as many of them died due to the mowing treatment. To assess whether warming and mowing treatment significantly changed terminal velocity we used ANOVA models. We log-transformed terminal velocity to compensate for skewed right distribution of the terminal velocity data and sinificant deviations from error normality (Figure \ref{fig:TVHistAndErrors}). 
 
-Using log-transformed terminal velocity, we use two methods to identify what is the most appropriate model to describe changes in terminal velocity based on the treatments.
 
 # Research Question 3
 
