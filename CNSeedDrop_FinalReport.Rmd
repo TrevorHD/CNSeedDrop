@@ -13,6 +13,7 @@ editor_options:
 header-includes:
 - \usepackage{float}
 - \usepackage[width=0.8\textwidth]{caption}
+urlcolor: blue
 ---
 
 ```{r setup, include = FALSE}
@@ -62,11 +63,11 @@ data.new$MowYN = ifelse(data.new$Mow == "CTL", 0, 1)
 
 As the world has become significantly more interconnected, the increased movement of people across the world has also facilitated an increase in the spread of species outside of their native ranges. When species that are introduced outside of their native range become invasive, they can have a detrimental impact on local biodiversity, quantity and quality of valuable ecosystem services, and other aspects of the local ecosystem. Because of this, the study of invasive species has been a large part of the ecology literature in recent decades, ranging from theoretical models of how they spread to investigating possible management practices that keep them at bay.
 
-One particular invasive species that has greatly expanded its range due to human activity is *Carduus nutans*, also known as "musk thistle" or "nodding thistle". This thistle is native to Europe and Central Asia, but has expanded its range into North America, Australia, and New Zealand, among other parts of the world (source). Within the U.S., this thistle has been reported in all U.S. states except for Alaska, Florida, Hawaii, Maine, and Vermont (source); the thistle may even be present in these states, but has not yet been reported. It is also been reported all Canadian provinces except Nunavut, Northwest Territories, and Yukon Territories (source).
+One particular invasive species that has greatly expanded its range due to human activity is *Carduus nutans*, also known as "musk thistle" or "nodding thistle". This thistle is native to Europe and Central Asia, but has expanded its range into North America, Australia, and New Zealand, among other parts of the world$^1$. Within the U.S., this thistle has been reported in all U.S. states except for Alaska, Florida, Hawaii, Maine, and Vermont$^2$; the thistle may even be present in these states, but has not yet been reported. It is also been reported all Canadian provinces except Nunavut, Northwest Territories, and Yukon Territories$^2$.
   
 *C. nutans* is considered to be a noxious weed in many U.S. states for several reasons. Because it can occur in very large numbers and grow to be quite large, this thistle may form dense and often impenetrable stands. The plant is also covered in numerous large spines, making it painful when touched as well as unpalatable to grazing animals. The adverse impacts of this weed on grazing can also lead to substantial economic losses.
 
-Another reason why there is concern over *C. nutans* is because it has a high potential to spread locally when introduced, as it is wind dispersed and large pappi on the seeds allow them to be transported great distances. Models have been proposed to model such wind-driven seed dispersal (source), and such models have been applied to *C. nutans* (source), showing significant potential for long-range dispersal events. While there are abiotic and biotic factors that affect how far a seed like those in *C. nutans* can be dispersed, a noteworthy predictor of dispersal distance is seed terminal velocity. For seeds, a higher terminal velocity generally means a decreased dispersal distance; this is because a higher terminal velocity means the seed falls faster and thus spends less time in the air, which means less of an opportunity for wind to carry it further from its source.
+Another reason why there is concern over *C. nutans* is because it has a high potential to spread locally when introduced, as it is wind dispersed and large pappi on the seeds allow them to be transported great distances. Models have been proposed to model such wind-driven seed dispersal$^3$, and such models have been applied to *C. nutans*$^4$, showing significant potential for long-range dispersal events. While there are abiotic and biotic factors that affect how far a seed like those in *C. nutans* can be dispersed, a noteworthy predictor of dispersal distance is seed terminal velocity. For seeds, a higher terminal velocity generally means a decreased dispersal distance; this is because a higher terminal velocity means the seed falls faster and thus spends less time in the air, which means less of an opportunity for wind to carry it further from its source.
 
 However, it is not entirely clear what affects terminal velocity in *C. nutans* seeds, though the most obvious candidates would be physical properties of the seed such as shape and mass. In general, seeds with a larger area perpendicular to the direction of motion will have higher drag and a lower terminal velocity. Seeds with a higher mass will have a higher downward force (mg) from gravity and thus a higher air resistance force that must equal it to achieve terminal velocity, which leads to a higher terminal velocity since said resistance force is proportional to that velocity. However, the physical properties of the seed may be affected by the morphology and physiology of the parent plant; abiotic and biotic factors can affect the parent plant in such a way that may ultimately influence the terminal velocity of its seeds.
 
@@ -325,3 +326,9 @@ Using log-transformed terminal velocity, we use two methods to identify what is 
 
 
 # Discussion
+
+# References
+1. US National Plant Germplasm System. Website  [npgsweb.ars-grin.gov](https://npgsweb.ars-grin.gov/gringlobal/taxonomydetail.aspx?id=104109) accessed 10 December 2019.
+2. USDA Natural Resources Conservation Service. Website [plants.usda.gov](https://plants.usda.gov/core/profile?symbol=CANU4) accessed 10 December 2019.
+3. Katul *et al.* 2005. *American Naturalist*, 166(3), pp. 368-381. 
+4. Skarpaas and Shea 2007. *American Naturalist*, 170(3), pp. 421-430. 
