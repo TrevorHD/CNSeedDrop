@@ -16,14 +16,18 @@ header-includes:
 ---
 
 ```{r setup, include = FALSE}
+
 # Load packages
 library(knitr)
 library(tidyverse)
 library(ggplot2)
 library(gridExtra)
-library(agricolae)
+#library(agricolae)
 library(MASS)
 library(maditr)
+library(corrplot)
+library(leaps)
+library(car)
 
 knitr::opts_chunk$set(echo = FALSE, warning = FALSE, fig.pos = 'H')
 
@@ -49,8 +53,6 @@ data.new$PlotUnique = as.factor(paste(data.new$Block,"_",data.new$Plot))
 
 # Create a mowing y/n flag
 data.new$MowYN = ifelse(data.new$Mow == "CTL", 0, 1)
-
-
 ```
 
 # Abstract
@@ -80,6 +82,43 @@ With this data, we will address three main research questions:
 \end{enumerate}
 
 # Research Question 1 
+
+``` {r}
+# Remove any rows where the quantities defined above are NaN
+data.new <- data.new[-which(is.nan(data.new[, 36])), ]
+```
+
+Before any models were fit to the data, we first examined correlations between the various seed physical properties. The `pairs` plot for terminal velocity and the various physical properties is shown below:
+
+``` {r}
+pairs(data.new[, c("TV", "SeedLength", "SeedWidth", "SeedAngle", "SeedArea", "SeedHeight", "SeedVol")])
+```
+
+Linear correlations between the variables can also be shown in a heatmap of the correlation matrix:
+
+``` {r}
+corrplot(cor(data.new[, c("TV", "SeedLength", "SeedWidth", "SeedAngle", "SeedArea", "SeedHeight", "SeedVol")]),
+         method = "square", type = "upper")
+```
+
+Between both of these plots, it is clear that multicollinearity will be an issue since several of the variables are highly correlated with each other (e.g. `SeedWidth` and `SeedAngle`, `SeedWidth` and `SeedArea`, etc.). 
+
+Our first model used the terminal veocity `TV` as a response and each of the physical properties as predictors. The resulting coefficients and their significance are listed below:
+
+``` {r}
+mod.full <- lm(TV ~ SeedWidth + SeedLength + SeedArea + SeedAngle + SeedHeight + 
+                    SeedVol, data = data.new)
+mod.full.out <- cbind(round(summary(mod.full)$coefficients, digits = 4),
+                      c("", round(vif(mod.full), digits = 4)),
+                      c("***", "**", ".", "", "", "", "*"))
+dimnames(mod.full.out)[[2]] <- c("Estimate", "Std. Error", "t value", "Pr(>|t|)",
+                                 "VIF", "Significance")
+kable(mod.full.out)
+```
+
+It is clear that this model is a poor fit for two main reasons. First, many of the terms are not significant to $\alpha = 0.05$ and add no significant additional predictive power to the model. Second, the VIF for all of the coefficients is quite high, as was predicted.
+
+Given that some of these variables must be removed to improve the fit of the model, we then performed variable selection on the full model to reduce clutter. The first method of selection was backwards selection from the full model; this involved removing subsequent variables based on their *p*-value; the variable with the highest *p*-value was removed, the resulting model examined, and the process repeated until all predictors were significant. The second method of selection involved backwards selection from the full model using AIC, where terms were removed until the AIC of the model was minimised. The third mehtod of selection started from the full model and used `step` selection in both directions, while the fourth method started from the null model and added terms; again, in both cases, the selection continued until the AIC of the model was minimised.
 
 # Research Question 2
 
