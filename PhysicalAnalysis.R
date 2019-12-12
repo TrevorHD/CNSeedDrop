@@ -102,7 +102,7 @@ with(testdata, lines(x = SeedWidth, y = TV, col = "chocolate1", lwd = 2))
 abline(mod.3, col = "deepskyblue", lwd = 2)
 remove(testdata)
 
-# Thus, model 3 (SeedWidth and SeedWidth^2) will be the best choice
+# Thus, model 4 (SeedWidth and SeedWidth^2) will be the best choice
 
 
 
@@ -110,7 +110,7 @@ remove(testdata)
 
 ##### Model diagnostics -----------------------------------------------------------------------------------
 
-# Model 3 seems to be a decent fit
+# Model 4 seems to be a decent fit
 plot(TV ~ SeedWidth, data = data.new)
 testdata <- data.frame(SeedWidth = seq(min(data.new$SeedWidth), max(data.new$SeedWidth), length.out = 300))
 testdata$TV = predict(mod.4, newdata = newdat)
@@ -126,11 +126,11 @@ abline(h = c(-2, 2), col = "red", lty = 3)
 # Residuals are mostly normally distributed, with only a bit of departure at the tails
 plot(mod.4)
 
-# Curved patterns in standardised residuals for model 4
+# Curved patterns in standardised residuals for model 3
 # We made the right choice by adding the quadratic term
 plot(rstandard(mod.3) ~ SeedWidth, data = data.new, ylab = "Standardised Residuals")
 abline(h = 0, col = "red")
 abline(h = c(-2, 2), col = "red", lty = 3)
 
-# More diagnostics for model 4
+# More diagnostics for model 3
 plot(mod.3)

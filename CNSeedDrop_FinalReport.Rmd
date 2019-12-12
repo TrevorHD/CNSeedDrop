@@ -160,8 +160,54 @@ kable(mod.1.out, align = "r")
 
 As we can see in the table, the first three selection methods produced the exact same result, while the fourth method produced a result with fewer terms. While the model derived from the first three methods has a higher R^2 and lower AIC than the model derived from the fourth method, it suffers greatly from high VIC. Because the VIF on the second model is much lower that that of the first and the difference in R^2 is very small, we will proceed with the second model, effectively trading a small increase in the amount of unexplained variance for a large decrease in multicollinearity.
 
+``` {r, include = FALSE}
+mod.3 <- lm(TV ~ SeedWidth, data = data.new)
+anova(mod.2, mod.3)
+```
 
+However, we still see a rather high VIF for the `SeedWidth` and `SeedArea` terms. While the `SeedArea` term may be inflating estimates when added to `SeedWidth`, a partial *F*-test confirms that its addition is statistically significant (*F* = 32.43, *p* < 0.001). Since `SeedArea` is proportional to the square of `SeedWidth`, we can simply express it as such in a polynomial regression instead of using a separate `SeedArea` variable for it.
 
+``` {r}
+mod.4 <- lm(TV ~ SeedWidth + I(SeedWidth^2), data = data.new)
+```
+
+Comparing this to a single-term model where VIF is not an issue, we see that a model with only `SeedWidth` is not as good of a fit, with an R^2 of 0.3274 compared to 0.3804 for the quadratic model. This is also clear when plotting the models against the data, as can be see below:
+
+``` {r, include = FALSE}
+summary(mod.3)
+summary(mod.4)
+```
+
+``` {r}
+plot(TV ~ SeedWidth, data = data.new)
+testdata <- data.frame(SeedWidth = seq(min(data.new$SeedWidth), max(data.new$SeedWidth), length.out = 300))
+testdata$TV = predict(mod.4, newdata = testdata)
+with(testdata, lines(x = SeedWidth, y = TV, col = "chocolate1", lwd = 2))
+abline(mod.3, col = "deepskyblue", lwd = 2)
+remove(testdata)
+```
+
+``` {r, fig.height = 14, fig.width = 12}
+par(mfrow = c(2, 1))
+plot(mod.3, which = 2, cex = 2)
+plot(mod.4, which = 2, cex = 2)
+```
+
+``` {r, fig.height = 14, fig.width = 12}
+par(mfrow = c(2, 1))
+plot(mod.3, which = 1, cex = 2)
+plot(mod.4, which = 1, cex = 2)
+```
+
+``` {r, fig.height = 14, fig.width = 12}
+par(mfrow = c(2, 1))
+plot(rstandard(mod.3) ~ SeedWidth, data = data.new, ylab = "Standardised Residuals")
+abline(h = 0, col = "red")
+abline(h = c(-2, 2), col = "red", lty = 3)
+plot(rstandard(mod.4) ~ SeedWidth, data = data.new, ylab = "Standardised Residuals")
+abline(h = 0, col = "red")
+abline(h = c(-2, 2), col = "red", lty = 3)
+```
 
 # Research Question 2
 
