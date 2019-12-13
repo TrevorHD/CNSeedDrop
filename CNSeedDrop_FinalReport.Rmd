@@ -13,11 +13,11 @@ editor_options:
 header-includes:
 - \usepackage{float}
 - \usepackage[width=0.8\textwidth]{caption}
+- \DeclareUnicodeCharacter{0007}{}
 urlcolor: blue
 ---
 
 ```{r setup, include = FALSE}
-
 # Load packages
 library(knitr)
 library(tidyverse)
@@ -58,6 +58,10 @@ data.new$MowYN = ifelse(data.new$Mow == "CTL", 0, 1)
 ```
 
 # Abstract
+Main points: 
+RQ2 - early mowing increased TV whereas warming decreased TV. There was no significnat effect observed for late mowed plants compared to control plants
+RQ3 - warmed and mowed plants have significantly smaller seed width
+
 
 # Introduction and Data
 
@@ -300,51 +304,16 @@ tab.dat = data.frame(Model = c("Warming", "Mowing and Warming", "Interaction"), 
 kable(tab.dat)
 ```
 
-To validate these model selection results, we also performed model selection with both AIC and BIC; the results are shown in the table below. 
+To validate these model selection results, we also evaluated both the AIC and BIC for each model, and results are shown in the table below. 
 
-```{r TV_ModelSelection, include = FALSE}
-fit.TV = lm(log(TV) ~ Warming * Mow, data = data.new)
-fitTV.select = list()
-#AIC
-fitTV.select$AICBoth = stepAIC(fit.TV, direction = "both")
-fitTV.select$AICBackward = stepAIC(fit.TV, direction =  "backward")
-fitTV.select$AICForward = stepAIC(lm(log(TV)~1, data = data.new), direction =  "forward")
-#BIC
-fitTV.select$BICBoth = stepAIC(fit.TV, direction = "both", k = log(length(data.new)))
-fitTV.select$BICBackward = stepAIC(fit.TV, direction =  "backward", k = log(length(data.new)))
-fitTV.select$BICForward = stepAIC(lm(log(TV)~1, data = data.new), direction =  "forward", k = log(length(data.new)))
+```{r TV_AIC}
+AIC = data.frame(Model =  c("Mowing","Warming", "Warming and Mowing", "Interaction"), AIC = c(AIC(mod.mow.log), AIC(mod.mow.log), AIC(mod.mowWarm.log), AIC(mod.int.log)), BIC = c(AIC(mod.mow.log, k = log(length(data.new))), AIC(mod.mow.log,k = log(length(data.new))), AIC(mod.mowWarm.log, k = log(length(data.new))), AIC(mod.int.log,k = log(length(data.new)))))
+AIC[2,3] = round(AIC[2,3],2)
+
+kable(AIC)
 ```
 
-```{r TV_ModelSelectionTable, fig.cap="\\label{fig:TV_ModelSelectionTable}CAPTION"}
-# results of model selection
-TV.selection = expand.grid(Variable = c("(Intercept)","MowE","WarmingW", "WarmingW:MowE"), Method = c("AICForward", "AICBackward", "AICBoth", "BICForward", "BICBackward", "BICBoth"))
-#TV.selection$Method = c("AIC: Forward", "AIC: Backward", "AIC: Bi-directional", "BIC: Forward", "BIC: Backward", "BIC: Bi-directional")
-#TV.selection$Variable = c("Intercept","Warming", "Mowing", "Warming:MowE")
-TV.selection$Included = NA
-
-#AIC = rep(NA, length = length(unique(TV.selection$Method)))
-for(i in TV.selection$Method){
-  for(j in TV.selection$Variable){
-    #browser()
-    TV.selection$Included[TV.selection$Method == i & TV.selection$Variable == j] = ifelse( j %in% names(fitTV.select[[i]][["coefficients"]]), 1,0 )
-  }
-  #AIC[which(unique(TV.selection$Method) == i)] = AIC(fitTV.select[[i]])
-}
-
-TV.selection$id <- rep(1:4,times = 6)
-TV.selection = dcast(data = TV.selection,formula = Variable~Method,fun.aggregate = sum,value.var = "Included")
-###FIX THIS###
-#TV.selection = rbind(TV.selection, as.matrix(c("",round(AIC),4),nrow = 1))
-#TV.selection[,-c(1)] = ifelse(TV.selection[,-c(1)] == 1, "Y", "")
-TV.selection[,1] = c("Intercept","Mowing","Warming","Warming:Mowing")
-colnames(TV.selection) = c("Variable", "AIC: Forward", "AIC: Backward", "AIC: Both", "BIC: Forward", "BIC: Backward", "BIC: Both")
-
-kable(TV.selection)
-```
-
-Backward and bi-directional selection for AIC and BIC support the warmign and mowing model, though forward selection suggests an intercept only model in both cases of AIC and BIC. The AIC and BIC for the warming and mowing model is ```r round(AIC(fitTV.select$AICBoth),2) ``` and ```r round(AIC(fitTV.select$AICBoth, k = log(length(data.new))),2) ```, respectively, whereas the intercept only model has ```r round(AIC(fitTV.select$AICForward),2) ``` and ```r round(AIC(fitTV.select$AICForward, k = log(length(data.new))),2) ``` respectively.  
-
-Thus, based on the results of the partial F-test and AIC/BIC model selection, we conclude that $Terminal Velocity = \beta_0 + \beta_1 Mowing+ \beta_2  Warming$ is the best model for our data. The residuals for this model are shown in Figure \ref{fig:TV_Resids}. The residuals show approximately random distribution, and though there are a few points with high leverage, they do are not high includence accroding to Cook's distance. Lastly, we can see that our log-transformation significantly improved the normality of the errors, as shown in the Normal Q-Q plot. 
+Both AIC and BIC support the warmign and mowing model,  and thus, based on the results of the partial F-test and AIC/BIC model selection, we conclude that $Terminal Velocity = \beta_0 + \beta_1 Mowing+ \beta_2  Warming$ is the best model for our terminal velocity data. The residuals for this model are shown in Figure \ref{fig:TV_Resids}. The residuals show approximately random distribution, and though there are a few points with high leverage, they do are not high includence accroding to Cook's distance. Lastly, we can see that our log-transformation significantly improved the normality of the errors, as shown in the Normal Q-Q plot. 
 
 ```{r TV_Resids, fig.height=8, fig.cap="\\label{fig:TV_Resids}Diagnostic plots for warming and mowing model."}
 par(mfrow = c(2,2))
@@ -375,21 +344,21 @@ ggplot(data = mowWarm.dat, aes(x = Mow, color = Warming))+
 # Research Question 3
 Next, we will explore the extent to which the results of Research Question 2, or the changes in terminal velocity by treatment, can be explained by seed width, as the results of Research Question 1 suggest that seed width is a good predictor of terminal velocity. Figure \ref{fig:SWbarplot} shows the variation in seed width across treatments. 
 
-```{r SWbarplot,fig.cap="\\label{fig:SWbarplot}Seed width by warming and mowing treatments. Height of bar shows group mean, and error bars show one standard error. Actual data shown with black dots."}
-barplot.dat = aggregate(data.new$SeedWidth, by = list(Mowing = data.new$MowYN, Warming = data.new$Warming), FUN = function(x) c(mean(x),sd = sd(x), n = length(x)))
+````{r SWbarplot,fig.cap="\\label{fig:SWbarplot}Seed width by warming and mowing treatments. Height of bar shows group mean, and error bars show one standard error. Actual data shown with black dots."}
+barplot.dat = aggregate(data.new$SeedWidth, by = list(Mowing = data.new$Mow, Warming = data.new$Warming), FUN = function(x) c(mean(x),sd = sd(x), n = length(x)))
 barplot.dat = do.call(data.frame, barplot.dat)
 barplot.dat$SE = barplot.dat$x.sd / sqrt(barplot.dat$x.n)
 colnames(barplot.dat) = c("Mowing", "Warming", "Mean", "SD", "n", "SE")
-barplot.dat$Mowing = ifelse(barplot.dat$Mowing == 1, "Y","N")
 
 ggplot(data = barplot.dat, aes(Mowing, Mean, fill = Warming))+
   geom_bar(stat = "identity", position = position_dodge(0.9))+
-  geom_point(data = data.new, aes(x = ifelse(MowYN == 1, "Y", "N"), group = Warming, y = SeedWidth), position = position_jitterdodge(dodge.width = 0.9), alpha = 0.5, shape = 16)+
+  geom_point(data = data.new, aes(x = Mow, group = Warming, y = SeedWidth), position = position_jitterdodge(dodge.width = 0.9), alpha = 0.5, shape = 16)+
   geom_errorbar(aes(ymin = Mean - SE, ymax = Mean + SE), width = 0.2, position = position_dodge(0.9))+
   labs(y = "Seed Width")+
   theme_bw()+
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())
 ```
+
 
 Our data fitting methods are similar to those of Research Question 2. We use partial F-tests and AIC/BIC analyses for model selection, but did not transform our response variable. First, we analyze the fit of the four basic models - mowing only, warming only, warming and mowing, and interaction - to identify which model is the best fit. 
 
@@ -423,44 +392,16 @@ tab.dat = data.frame(Model = c("Warming", "Mowing and Warming", "Interaction"), 
 kable(tab.dat)
 ```
 
-Again, we use AIC/BIC model selection to validate these results.
+Again, we use AIC and BIC model selection criteria to validate these results.
 
-```{r SW_ModelSelection, include = FALSE}
-fit.SW = lm(SeedWidth ~ Warming * Mow, data = data.new)
-fitSW.select = list()
-#AIC
-fitSW.select$AICBoth = stepAIC(fit.SW, direction = "both")
-fitSW.select$AICBackward = stepAIC(fit.SW, direction =  "backward")
-fitSW.select$AICForward = stepAIC(lm(SeedWidth~1, data = data.new), direction =  "forward")
-#BIC
-fitSW.select$BICBoth = stepAIC(fit.SW, direction = "both", k = log(length(data.new)))
-fitSW.select$BICBackward = stepAIC(fit.SW, direction =  "backward", k = log(length(data.new)))
-fitSW.select$BICForward = stepAIC(lm(SeedWidth~1, data = data.new), direction =  "forward", k = log(length(data.new)))
+```{r SW_AIC}
+AIC = data.frame(Model =  c("Mowing","Warming", "Warming and Mowing", "Interaction"), AIC = c(AIC(SW.mow), AIC(SW.warm), AIC(SW.mowWarm), AIC(SW.int)), BIC = c(AIC(SW.mow, k = log(length(data.new))), AIC(SW.warm,k = log(length(data.new))), AIC(SW.mowWarm, k = log(length(data.new))), AIC(SW.int,k = log(length(data.new)))))
+AIC[2,3] = round(AIC[2,3],2)
+
+kable(AIC)
 ```
 
-```{r SW_ModelSelectionTable, fig.cap="\\label{fig:TV_ModelSelectionTable}CAPTION"}
-# results of model selection
-SW.selection = expand.grid(Variable = c("(Intercept)","MowE","WarmingW", "WarmingW:MowE"), Method = c("AICForward", "AICBackward", "AICBoth", "BICForward", "BICBackward", "BICBoth"))
-SW.selection$Included = NA
-
-
-for(i in SW.selection$Method){
-  for(j in SW.selection$Variable){
-    SW.selection$Included[SW.selection$Method == i & SW.selection$Variable == j] = ifelse( j %in% names(fitSW.select[[i]][["coefficients"]]), 1,0 )
-  }
-}
-
-SW.selection$id <- rep(1:4,times = 6)
-SW.selection = dcast(data = SW.selection,formula = Variable~Method,fun.aggregate = sum,value.var = "Included")
-SW.selection[,1] = c("Intercept","Mowing","Warming","Warming:Mowing")
-colnames(SW.selection) = c("Variable", "AIC: Forward", "AIC: Backward", "AIC: Both", "BIC: Forward", "BIC: Backward", "BIC: Both")
-
-kable(SW.selection)
-```
-
-Again, we see similar results to those in Research Question 2. The results of the AIC/BIC  backward and bi-directional suggest the warming and mowing model is the best fit (AIC: ```r round(AIC(fitSW.select$AICBoth),2) ``` and BIC: ```r round(AIC(fitSW.select$AICBoth, k = log(length(data.new))),2) ```,), wherease forward selection indicates an intercept only model (AIC:```r round(AIC(fitSW.select$AICForward),2) ``` and  BIC:```r round(AIC(fitSW.select$AICForward, k = log(length(data.new))),2) ```).  Based on the AIC and BIC values of the warminga nd mowing vs. intercept only model, we conclude that the warming and mowing model is the best fit. 
-
-Thus, both the partial F-test and the AIC/BIC model selection support the mowing and warming model, whose model diagnostic plots are shown in Figure \ref{fig:SW_Resids}. These residuals suggest our errors are approximately normally distributed. Again, there may be some leverage points, though they do not have high influence. 
+We see similar results to those in Research Question 2, suggesting that the warming and mowing model is the best fit. Thus, both the partial F-test and the AIC/BIC model selection support the mowing and warming model, whose model diagnostic plots are shown in Figure \ref{fig:SW_Resids}. These residuals suggest our errors are approximately normally distributed. Again, there may be some leverage points, though they do not have high influence. 
 
 ```{r SW_Resids, fig.height=8, fig.cap="\\label{fig:SW_Resids}Diagnostic plots for predicting seed width using warming and mowing model."}
 par(mfrow = c(2,2))
@@ -473,14 +414,76 @@ The table below shows the results of the mowing and warming model for predicting
 kable(round(summary(SW.mowWarm)$coefficients,4))
 ```
 
-To investigate the pairwise comparisons of seed width between each group, we performed a post-hoc Tukey HSD test. 
+To investigate the pairwise comparisons of seed width between each group, we performed a post-hoc Tukey HSD test (Figure \ref{fig:SW_Tukey}). 
 
-```{r SW_Tukey, fig.width = 6, fig.cap="\\label{fig:SW_Tukey}Results of post-hoc Tukey HSD test. Letters indicate groups which are significantly different. "}
+```{r SW_Tukey, fig.width = 5.8, fig.cap="\\label{fig:SW_Tukey}Results of post-hoc Tukey HSD test. Letters indicate groups which are significantly different, where $\alpha = 0.05$ is the significance level. "}
 out = HSD.test(aov(SeedWidth ~ Mow + Warming + Mow:Warming, data= data.new), c("Mow","Warming"))
 bar.group(out$groups, ylim = c(0,25), xlab = "Mowing", ylab = "Seed Width", main = "Tukey HSD")
-````
+```
+
+These results suggest that there are two major groups which emerge: (1) non-mowed, control plants regardless of whether they were warmed and (2) warmed plants that were mowed, regardless of the timing of the mowing. Because the timing of the mowing does not appear to be a significant factor in determining seed width, we fit a second model predicting seed width based on warming and a binary mowing variable.   
+```{r SWbin_ANOVA, include = FALSE}
+# warming
+SWbin.warm = lm(SeedWidth ~ Warming, data= data.new)
+summary(SWbin.warm)
+F.warm = summary((SWbin.warm))$fstatistic
+
+# early vs. late mowing 
+SWbin.mow = lm(SeedWidth ~ MowYN, data= data.new)
+summary(SWbin.mow)
+F.mow = summary((SWbin.mow))$fstatistic
+
+# no interaction (E/L mow)
+SWbin.mowWarm = lm(SeedWidth ~ MowYN + Warming, data = data.new)
+summary(SWbin.mowWarm)
+
+# interaction (E/L mow)
+SWbin.int = lm(SeedWidth ~ MowYN + Warming + MowYN:Warming, data= data.new)
+summary(SWbin.int)
+#anova(mod.int.log)
+```
+
+
+```{r TV_SWbinANOVAResults}
+tab.dat = anova(SWbin.mow, SWbin.mowWarm, SWbin.int)
+tab.dat = data.frame(Model = c("Warming", "Mowing and Warming", "Interaction"), "P-Value" = round(tab.dat[,"Pr(>F)"],4))
+kable(tab.dat)
+```
+
+```{r SWbin_AIC}
+AIC = data.frame(Model =  c("Mowing","Warming", "Warming and Mowing", "Interaction"), AIC = c(AIC(SWbin.mow), AIC(SWbin.warm), AIC(SWbin.mowWarm), AIC(SWbin.int)), BIC = c(AIC(SWbin.mow, k = log(length(data.new))), AIC(SWbin.warm,k = log(length(data.new))), AIC(SWbin.mowWarm, k = log(length(data.new))), AIC(SWbin.int,k = log(length(data.new)))))
+AIC[2,3] = round(AIC[2,3],2)
+kable(AIC)
+```
+
+Discerning between the mowing and warming vs. the interaction models is less clear in this case. On one hand, the partial F-test suggests the interaction model may provide a slightly better fit and the interaction model has the lowest AIC value, but the warming and mowing model has the lowest BIC value. This result is not unexpected, as a slight improvement in model fit may not be enough to overcome the BIC penality for an additional term in the interaction model. 
+
+The results of both models are summarized in Table XX. In the warming and mowing model, both treatments decrease seed width, whereas when an interaction term is added, neither of these terms are significant, but the interaction term itself becomes significant at a level of 0.1.  
+
+```{r SWbin_ModelResults}
+df1 = round(summary(SWbin.mowWarm)$coefficients[,c(1,4)],4)
+rownames(df1) = c("Intercept", "Mow", "Warm")
+df2 = round(summary(SWbin.int)$coefficients[,c(1,4)],4)
+rownames(df2) = c("Intercept", "Mow", "Warm", "Mow:Warm")
+df = cbind(rbind(df1,rep(NA,times = 2)), df2)
+rownames(df) = c("Intercept", "Mow", "Warm", "Mow:Warm")
+kable(df, caption = "Results of Mowing and Warming and Interaction models, respectively.")
+```
+
+These two results suggest that plants which are both warmed and mowed have a significantly smaller seed width. These plants are likely driving the significant mowing and warming coefficients in the model without interaction. Another post-hoc Tukey test, shown in Figure \ref{fig:SWbin_Tukey}, supports this conclusion. 
+
+```{r SWbin_Tukey, fig.width = 5.8, fig.cap="\\label{fig:SWbin_Tukey}Results of post-hoc Tukey HSD test. Letters indicate groups which are significantly different, where $\alpha = 0.05$ is the significance level. "}
+out = HSD.test(aov(SeedWidth ~ MowYN + Warming + MowYN:Warming, data= data.new), c("MowYN","Warming"))
+bar.group(out$groups, ylim = c(0,25), xlab = "Mowing", ylab = "Seed Width", main = "Tukey HSD")
+```
+
 
 # Discussion
+
+The results of this experiment contributes to our understanding of how *Carduus nutans* seeds may disperse under warmer conditions, and further how mowing management may mediate these changes. We found that, as is predicted by physical models$^4$, that the width of the seed is a good predictor of terminal velcoity. Smaller seeds fall faster, and thus disperse less far. 
+
+We also found that both mowing and warming treatments significantly affected seed terminal velocity. Early mowing decreased terminal velocity, while warming increased terminal velocity. Thus, all else being equal, we expect mowed plants to disperse further and warmed plants to disperse less far. 
+
 
 # References
 1. US National Plant Germplasm System. Website  [npgsweb.ars-grin.gov](https://npgsweb.ars-grin.gov/gringlobal/taxonomydetail.aspx?id=104109) accessed 10 December 2019.
