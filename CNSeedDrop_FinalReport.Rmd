@@ -13,7 +13,6 @@ editor_options:
 header-includes:
 - \usepackage{float}
 - \usepackage[width=0.8\textwidth]{caption}
-- \DeclareUnicodeCharacter{0007}{}
 urlcolor: blue
 ---
 
@@ -33,8 +32,6 @@ library(car)
 
 knitr::opts_chunk$set(echo = FALSE, warning = FALSE, fig.pos = 'H')
 options(knitr.kable.NA = "")
-
-
 
 #Initialise data
 data <- read.csv("https://raw.githubusercontent.com/TrevorHD/CNSeedDrop/master/SeedDropData.csv")
@@ -59,6 +56,9 @@ data.new$MowYN = ifelse(data.new$Mow == "CTL", 0, 1)
 ```
 
 # Abstract
+
+The invasive thistle *Carduus nutans* has been a management concern for landowners and governments alike, with dispersal in this plant playing an important role in its spread. Given that the terminal velocity of *C. nutans* seeds greatly influences dispersal distance, we seek to beter understand how both the seed physical properties and treatments of the parent plant can affect terminal velocity in seeds. Our analyses show that the width of the seed pappus is the most important factor in determining its terminal velocity, with increasing pappus width leading to a decreased terminal velocity. Warming and mowing treatments on the parent plants had significant effects on the pappus width, with warmed and mowed plants having a much smaller seed width. When looking at effects of the treatments on terminal velocity, early mowing increased terminal velocity whereas warming decreased terminal velocity. No significnat effect was observed for late mowed plants compared to control plants.
+
 Main points: 
 RQ2 - early mowing increased TV whereas warming decreased TV. There was no significant effect observed for late mowed plants compared to control plants
 RQ3 - warmed and mowed plants have significantly smaller seed width
@@ -158,8 +158,8 @@ mod.1.out <- cbind(c(summary(mod.1)$coefficients[1:3, 1], rep(NA, 2), summary(mo
                    c(summary(mod.2)$coefficients[1:2, 1], NA, summary(mod.1)$coefficients[4, 1], rep(NA, 3)),
                    c(NA, vif(mod.1)[1:2], rep(NA, 2), vif(mod.1)[3:4]),
                    c(NA, vif(mod.2)[1], NA, vif(mod.2)[2], rep(NA, 3)))
-mod.1.out <- rbind(mod.1.out, c(rep(-1293.6, 3), -1288.4),
-                              c(rep(summary(mod.1)$adj.r.squared, 3), summary(mod.2)$adj.r.squared))
+mod.1.out <- rbind(mod.1.out, c(rep(-1293.6, 3), -1288.4, rep(NA, 2)),
+                              c(rep(summary(mod.1)$adj.r.squared, 3), summary(mod.2)$adj.r.squared, rep(NA, 2)))
 dimnames(mod.1.out)[[1]] <- c(dimnames(mod.full.out)[[1]], "AIC", "R^2")
 dimnames(mod.1.out)[[2]] <- c("Method 1", "Method 2", "Method 3", "Method 4", "Method 1,2,3 VIF", "Method 4 VIF")
 kable(mod.1.out, align = "r")
@@ -306,6 +306,7 @@ tab.dat = data.frame(Model = c("`Warming Only`", "`Warming and Mowing`", "`Inter
 kable(tab.dat, caption = "\\label{tab:TV_ANOVAResults}Results of partial F-test comparing three models for predicting terminal velocity.")
 ```
 
+
 Like the partial F-test, both AIC and BIC support the `Warming and Mowing` model (Table \ref{tab:TV_AIC}). Thus, we conclude that $Terminal Velocity = \beta_0 + \beta_1 Mowing+ \beta_2  Warming$ is the best model fit for the log-transformed terminal velocity data.
 
 ```{r TV_AIC}
@@ -315,6 +316,7 @@ kable(AIC, caption = "\\label{tab:TV_AIC}AIC and BIC values for each model.")
 ```
 
 The residuals for the `Warming and Mowing` model are shown in Figure \ref{fig:TV_Resids}. The residuals show approximately random distribution, and though there are a few points with high leverage, they do are not high includence accroding to Cook's distance. Lastly, we can see that our log-transformation significantly improved the normality of the errors, as shown in the Normal Q-Q plot. 
+
 
 ```{r TV_Resids, fig.height=8, fig.cap="\\label{fig:TV_Resids}Diagnostic plots for `Warming and Mowing` model."}
 par(mfrow = c(2,2))
@@ -347,15 +349,16 @@ ggplot(data = mowWarm.dat, aes(x = Mow, color = Warming))+
 # Research Question 3
 Next, we will explore the extent to which the results of Research Question 2, or the changes in terminal velocity by treatment, can be explained by changes in seed width. We are investigating seed width specifically because the results of Research Question 1 show that seed width is a good predictor of terminal velocity. Figure \ref{fig:SWbarplot} shows the variation in seed width across treatments. 
 
-````{r SWbarplot,fig.cap="\\label{fig:SWbarplot}Seed width by warming and mowing treatments. Height of bar shows group mean, and error bars show one standard error. Actual data shown with black dots."}
-barplot.dat = aggregate(data.new$SeedWidth, by = list(Mowing = data.new$Mow, Warming = data.new$Warming), FUN = function(x) c(mean(x),sd = sd(x), n = length(x)))
+```{r SWbarplot,fig.cap="\\label{fig:SWbarplot}Seed width by warming and mowing treatments. Height of bar shows group mean, and error bars show one standard error. Actual data shown with black dots."}
+barplot.dat = aggregate(data.new$SeedWidth, by = list(Mowing = data.new$MowYN, Warming = data.new$Warming), FUN = function(x) c(mean(x),sd = sd(x), n = length(x)))
 barplot.dat = do.call(data.frame, barplot.dat)
 barplot.dat$SE = barplot.dat$x.sd / sqrt(barplot.dat$x.n)
 colnames(barplot.dat) = c("Mowing", "Warming", "Mean", "SD", "n", "SE")
+barplot.dat$Mowing = ifelse(barplot.dat$Mowing == 1, "Y","N")
 
 ggplot(data = barplot.dat, aes(Mowing, Mean, fill = Warming))+
   geom_bar(stat = "identity", position = position_dodge(0.9))+
-  geom_point(data = data.new, aes(x = Mow, group = Warming, y = SeedWidth), position = position_jitterdodge(dodge.width = 0.9), alpha = 0.5, shape = 16)+
+  geom_point(data = data.new, aes(x = ifelse(MowYN == 1, "Y", "N"), group = Warming, y = SeedWidth), position = position_jitterdodge(dodge.width = 0.9), alpha = 0.5, shape = 16)+
   geom_errorbar(aes(ymin = Mean - SE, ymax = Mean + SE), width = 0.2, position = position_dodge(0.9))+
   labs(y = "Seed Width")+
   theme_bw()+
@@ -363,7 +366,8 @@ ggplot(data = barplot.dat, aes(Mowing, Mean, fill = Warming))+
 ```
 
 
-Our methods are similar to those of Research Question 2. Again, we use partial F-tests and AIC/BIC analyses for model selection, though there was no need to log-transform seed width. First, we analyze the fit of the four basic models - `Mowing Only`, `Warming Only`, `Warming and Mowing`, and `Interaction` - to identify which model fits the data best. 
+Our data fitting methods are similar to those of Research Question 2. We use partial F-tests and AIC/BIC analyses for model selection, but did not transform our response variable. First, we analyze the fit of the four basic models - mowing only, warming only, warming and mowing, and interaction - to identify which model is the best fit. 
+
 
 ```{r SW_ANOVA, include = FALSE}
 # warming
@@ -405,6 +409,7 @@ kable(AIC, caption = "\\label{tab:SW_AIC} AIC and BIC values for each of the fou
 
  Thus, both the partial F-test and the AIC/BIC values support the `Warming and Mowing` model, whose model diagnostic plots are shown in Figure \ref{fig:SW_Resids}. These residuals suggest the errors are approximately normally distributed. Again, there may be a few leverage points, though they do not have high influence. 
 
+
 ```{r SW_Resids, fig.height=8,fig.width=10, fig.cap="\\label{fig:SW_Resids}Diagnostic plots for predicting seed width using `Warming and Mowing` model."}
 par(mfrow = c(2,2))
 plot(SW.mowWarm)
@@ -418,6 +423,7 @@ df[,1] = paste(df[,1], " (", round(confint(SW.mowWarm)[,1],2),", ",round(confint
 kable(df, caption = "\\label{tab:SW_ModelResults} Results of `Warming and Mowing` model for predicting seed width. Coefficient estiamtes, 95% confidence intervals and p-values are shown.")
 ```
 
+\
 To investigate the pairwise comparisons between each group, we performed a post-hoc Tukey HSD test (Figure \ref{fig:SW_Tukey}). 
 
 ```{r SW_Tukey, fig.width = 5.8, fig.cap="\\label{fig:SW_Tukey}Results of post-hoc Tukey HSD test. Letters indicate groups which are significantly different, where 0.05 is the significance level. Notation is as follows: CTL - no mowing, E - early mowing, L - late mowing; A - ambient (i.e. no warming), W - warming"}
@@ -498,7 +504,6 @@ We also found that warming increased terminal velocity. In this case, all else b
 We showed that plants which were both warmed and mowed had smaller seed width. Based on our model which describes terminal velocity as a function of seed width (Research Question 1), we expect these warmed and mowed plants to have higher terminal velocity and, therefore, to disperse less far. Yet, in our analysis of changes in terminal velocity by treatment (Research Question 2), we showed mowing decreased terminal velocity. These discrepencies suggest that treatment level changes in seed terminal velcotiy cannot be fully explained by changes in seed width. 
 
 This data set is lacking seed mass data, which may be responsible for the inconsistencies we observed. Seed mass is a second physical property needed to predict terminal velocity$^4$ and may also change with warming and mowing. Lacking seed mass data limits our ability to explain changes in seed terminal velocity through physical properties of the seed. However, our results which quantify the effect of the treatments on terminal velocity are unaffected, Further studies which measure both seed width and seed mass will be necessary to  explain  physical and biological mechanisms which explain the observed changes in terminal velocity. 
-
 
 
 # References
