@@ -56,13 +56,7 @@ data.new$MowYN = ifelse(data.new$Mow == "CTL", 0, 1)
 ```
 
 # Abstract
-
-The invasive thistle *Carduus nutans* has been a management concern for landowners and governments alike, with dispersal in this plant playing an important role in its spread. Given that the terminal velocity of *C. nutans* seeds greatly influences dispersal distance, we seek to beter understand how both the seed physical properties and treatments of the parent plant can affect terminal velocity in seeds. Our analyses show that the width of the seed pappus is the most important factor in determining its terminal velocity, with increasing pappus width leading to a decreased terminal velocity. Warming and mowing treatments on the parent plants had significant effects on the pappus width, with warmed and mowed plants having a much smaller seed width. When looking at effects of the treatments on terminal velocity, early mowing increased terminal velocity whereas warming decreased terminal velocity. No significnat effect was observed for late mowed plants compared to control plants.
-
-Main points: 
-RQ2 - early mowing increased TV whereas warming decreased TV. There was no significant effect observed for late mowed plants compared to control plants
-RQ3 - warmed and mowed plants have significantly smaller seed width
-
+The invasive thistle *Carduus nutans* has been a management concern for landowners and governments alike, with dispersal in this plant playing an important role in its spread. Given that the terminal velocity of *C. nutans* seeds strongly influences dispersal distance, we seek to beter understand how both pappus shape and treatment of the parent plant affect seed terminal velocity. Our analyses show that the width of the seed pappus was the most important factor in determining seed terminal velocity and that the two were negatively correlated, with higher pappus width generally giving rise to a lower terminal velocity. Warming and mowing treatments on the parent plants had significant effects on the pappus width, with warmed and mowed plants having a much smaller pappus width. Regarding the effects of the treatments on seed terminal velocity, early mowing increased terminal velocity, while warming decreased terminal velocity; no significant effect was observed for late mowed plants compared to control plants. Given that mowing was shown to increase pappus width and that increased pappus width was shown to reduce terminal velocity, it is surprising that plants experiencing the early mowing treatment had higher seed terminal velocity. Such a contridiction merits further investigation of additional factors, such as mass, that may affect seed terminal velocity.
 
 # Introduction and Data
 
@@ -72,7 +66,7 @@ One particular invasive species that has greatly expanded its range due to human
   
 *C. nutans* is considered to be a noxious weed in many U.S. states for several reasons. Because it can occur in very large numbers and grow to be quite large, this thistle may form dense and often impenetrable stands. The plant is also covered in numerous large spines, making it painful when touched as well as unpalatable to grazing animals. The adverse impacts of this weed on grazing can also lead to substantial economic losses.
 
-Another reason why there is concern over *C. nutans* is because it has a high potential to spread locally when introduced, as it is wind dispersed and large pappi on the seeds allow them to be transported great distances. Models have been proposed to model such wind-driven seed dispersal$^3$, and such models have been applied to *C. nutans*$^4$, showing significant potential for long-range dispersal events. While there are abiotic and biotic factors that affect how far a seed like those in *C. nutans* can be dispersed, a noteworthy predictor of dispersal distance is seed terminal velocity. For seeds, a higher terminal velocity generally means a decreased dispersal distance; this is because a higher terminal velocity means the seed falls faster and thus spends less time in the air, which means less of an opportunity for wind to carry it further from its source.
+Another reason why there is concern over *C. nutans* is because it has a high potential to spread locally when introduced. This thistle is wind dispersed and seeds have a large pappus, or a feathery and lightweight modified calyx, on the seeds that allows them to be transported great distances. Models have been proposed to model such wind-driven seed dispersal$^3$, and such models have been applied to *C. nutans*$^4$, showing significant potential for long-range dispersal events. While there are abiotic and biotic factors that affect how far a seed like those in *C. nutans* can be dispersed, a noteworthy predictor of dispersal distance is seed terminal velocity. For seeds, a higher terminal velocity generally means a decreased dispersal distance; this is because a higher terminal velocity means the seed falls faster and thus spends less time in the air, which means less of an opportunity for wind to carry it further from its source.
 
 However, it is not entirely clear what affects terminal velocity in *C. nutans* seeds, though the most obvious candidates would be physical properties of the seed such as shape and mass. In general, seeds with a larger area perpendicular to the direction of motion will have higher drag and a lower terminal velocity. Seeds with a higher mass will have a higher downward force (*mg*) from gravity and thus a higher air resistance force that must equal it to achieve terminal velocity, which leads to a higher terminal velocity since said resistance force is proportional to that velocity. However, the physical properties of the seed may be affected by the morphology and physiology of the parent plant; abiotic and biotic factors can affect the parent plant in such a way that may ultimately influence the terminal velocity of its seeds.
 
@@ -83,7 +77,7 @@ The data used to assess the effects of mowing and warming on seed terminal veloc
 Using the data from the experiment described above, we seek answers to three research questions of interest:
 
 \begin{enumerate}
-\item Is seed terminal velocity predicted by seed shape parameters?
+\item Is seed terminal velocity predicted by the shape of the seed pappus?
 \item To what extent do warming and mowing treatments change seed terminal velocity?
 \item Can changes in terminal velocity by treatment be explained by changes in seed shape parameters?
 \end{enumerate}
