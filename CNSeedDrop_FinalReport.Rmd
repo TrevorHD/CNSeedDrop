@@ -96,15 +96,17 @@ data.new <- data.new[-which(is.nan(data.new[, 36])), ]
 
 Before any models were fit to the data, we first examined correlations between the various seed physical properties. The `pairs` plot for terminal velocity and the various physical properties is shown below:
 
-``` {r}
+``` {r TVPairsPlot, fig.cap = "\\label{fig:TVPairsPlot} Plot of relationships between variables considered in this analysis.", fig.height = 6, fig.width = 10}
 pairs(data.new[, c("TV", "SeedLength", "SeedWidth", "SeedAngle", "SeedArea", "SeedHeight", "SeedVol")])
 ```
 
 Linear correlations between the variables can also be shown in a heatmap of the correlation matrix:
 
-``` {r}
+``` {r TVCorrPlot, fig.cap = "\\label{fig:TVCorrPlot} Correlations between variables considered in this analysis.", fig.height = 6, fig.width = 10}
 corrplot(cor(data.new[, c("TV", "SeedLength", "SeedWidth", "SeedAngle", "SeedArea", "SeedHeight", "SeedVol")]),
-         method = "square", type = "upper")
+         method = "number", type = "lower", tl.pos = "n", cl.pos = "n", tl.col = "black")
+corrplot(cor(data.new[, c("TV", "SeedLength", "SeedWidth", "SeedAngle", "SeedArea", "SeedHeight", "SeedVol")]),
+         method = "square", type = "upper", tl.pos = "lt", add = TRUE, tl.col = "black")
 ```
 
 Between both of these plots, it is clear that multicollinearity will be an issue since several of the variables are highly correlated with each other (e.g. `SeedWidth` and `SeedAngle`, `SeedWidth` and `SeedArea`, etc.). 
@@ -185,7 +187,7 @@ summary(mod.4)
 
 We can also compare the distribution of residuals between the two models to check their validity. As can be seen below, the residuals are approximately normally-distributed for both models, with a bit of deviation from normality at the tails of the distribution.
 
-``` {r}
+``` {r TVComparisonPlot, fig.cap = "\\label{fig:TVComparisonPlot} Plot of seed terminal velocity as a function of seed width. The two models are also plotted: the quadratic model (orange) and the linear model (blue).", fig.height = 6, fig.width = 10}
 plot(TV ~ SeedWidth, data = data.new)
 testdata <- data.frame(SeedWidth = seq(min(data.new$SeedWidth), max(data.new$SeedWidth), length.out = 300))
 testdata$TV = predict(mod.4, newdata = testdata)
@@ -196,19 +198,19 @@ remove(testdata)
 
 However, there are clearly differences regarding patterns of distribution in the residuals. For the model with only `SeedWidth`, there appears to be some curvature in the distribution of residuals, suggesting that an invalid model has been fit to the data. However, in the model with both linear and quadratic `SeedWidth` terms, the curved pattern in the residuals disappears, suggesting that this model is more valid.
 
-``` {r, fig.height = 14, fig.width = 12}
+``` {r R1ComparisonPlot, fig.cap = "\\label{fig:R1ComparisonPlot} Q-Q Plots comparing normality of the residuals in the linear model (left) and quadratic model (right).", fig.height = 14, fig.width = 12}
 par(mfrow = c(2, 1))
 plot(mod.3, which = 2, cex.lab = 1.6, cex.axis = 1.4, main = NA)
 plot(mod.4, which = 2, cex.lab = 1.6, cex.axis = 1.4, main = NA)
 ```
 
-``` {r, fig.height = 14, fig.width = 12}
+``` {r R2ComparisonPlot, fig.cap = "\\label{fig:R2ComparisonPlot} Comparison of residual distributions as a function of fitted values in the linear model (left) and quadratic model (right).", fig.height = 14, fig.width = 12}
 par(mfrow = c(2, 1))
 plot(mod.3, which = 1, cex.lab = 1.6, cex.axis = 1.4, main = NA)
 plot(mod.4, which = 1, cex.lab = 1.6, cex.axis = 1.4, main = NA)
 ```
 
-``` {r, fig.height = 14, fig.width = 12}
+``` {r R3ComparisonPlot, fig.cap = "\\label{fig:R3ComparisonPlot} Comparison of standardised residual distributions as a function of observed values in the linear model (left) and quadratic model (right).", fig.height = 14, fig.width = 12}
 par(mfrow = c(2, 1))
 plot(rstandard(mod.3) ~ SeedWidth, data = data.new, ylab = "Standardised Residuals")
 abline(h = 0, col = "red")
