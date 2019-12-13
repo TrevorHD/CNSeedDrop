@@ -69,13 +69,13 @@ One particular invasive species that has greatly expanded its range due to human
 
 Another reason why there is concern over *C. nutans* is because it has a high potential to spread locally when introduced, as it is wind dispersed and large pappi on the seeds allow them to be transported great distances. Models have been proposed to model such wind-driven seed dispersal$^3$, and such models have been applied to *C. nutans*$^4$, showing significant potential for long-range dispersal events. While there are abiotic and biotic factors that affect how far a seed like those in *C. nutans* can be dispersed, a noteworthy predictor of dispersal distance is seed terminal velocity. For seeds, a higher terminal velocity generally means a decreased dispersal distance; this is because a higher terminal velocity means the seed falls faster and thus spends less time in the air, which means less of an opportunity for wind to carry it further from its source.
 
-However, it is not entirely clear what affects terminal velocity in *C. nutans* seeds, though the most obvious candidates would be physical properties of the seed such as shape and mass. In general, seeds with a larger area perpendicular to the direction of motion will have higher drag and a lower terminal velocity. Seeds with a higher mass will have a higher downward force (mg) from gravity and thus a higher air resistance force that must equal it to achieve terminal velocity, which leads to a higher terminal velocity since said resistance force is proportional to that velocity. However, the physical properties of the seed may be affected by the morphology and physiology of the parent plant; abiotic and biotic factors can affect the parent plant in such a way that may ultimately influence the terminal velocity of its seeds.
+However, it is not entirely clear what affects terminal velocity in *C. nutans* seeds, though the most obvious candidates would be physical properties of the seed such as shape and mass. In general, seeds with a larger area perpendicular to the direction of motion will have higher drag and a lower terminal velocity. Seeds with a higher mass will have a higher downward force (*mg*) from gravity and thus a higher air resistance force that must equal it to achieve terminal velocity, which leads to a higher terminal velocity since said resistance force is proportional to that velocity. However, the physical properties of the seed may be affected by the morphology and physiology of the parent plant; abiotic and biotic factors can affect the parent plant in such a way that may ultimately influence the terminal velocity of its seeds.
 
-Given that there may be a link between abiotic influences on *C. nutans* and the terminal velocity of its seeds, we wish to investigate whether certain treatments applied to the plant before it flowers have any effect on seed dispersal capabilities. Any treatment effects that can reduce the dispersal capability of these thistles may then be used to inform management decisions. By using mowing treatment as well as a warming treatment (and combinations of the two), we will examine the effects of said treatments on seed terminal velocity and thus on dispersal capability.
+Given that there may be a link between abiotic influences on *C. nutans* and the terminal velocity of its seeds, we wish to investigate whether certain treatments applied to the plant before it flowers have any effect on seed dispersal capabilities. Any treatment effects that can reduce the dispersal capability of these thistles may then be used to inform management decisions. By using mowing treatments as well as warming treatments (and combinations of the two), we will examine the effects of said treatments on seed terminal velocity and thus on dispersal capability.
 
-The data used to assess the effectiveness of the treatments were collected during a field experiment which crossed warming and mowing treatments.  There were ten blocks, where each block subset into two plots - one warmed treatment and one ambient. Within a plot there are three positions, one for each mowing treatment. Ten seeds were planted at each position. One flower head was harvested from all individuals that survived to harvest date. Seeds were collected from individual flower heads and subsequently tested in a drop chamber. Seed drop tests were repeated until two drop times were recorded within 0.1 seconds. With these data, we want to assess the variation in drop time of seeds from plants under warming and/or mowing.
+The data used to assess the effects of mowing and warming on seed terminal velocity were collected during a field experiment that involved applying these treatments to parent plants and collecting their flower heads aftey they had set seed. The experimental setup involves ten blocks, with each block containing two plots: one plot with a warming treatment and one without. Within each plot there are three positions: one with an early mowing treatment, one with a late mowing treatment, and one with no mowing at all. Overall, this yields six unique combinations of warming and mowing, with 10 replicates for each combination. Ten seeds were planted at each position, and one flower head was harvested from all individuals that survived to harvest date. Seeds were collected from individual flower heads and their terminal velocities were determined by timing the amount of time it took them to afll through a 1.25-m drop chamber. For each seed, these drop tests were repeated until two consecutive drop times were recorded within 0.1 seconds of each other.
 
-With this data, we will address three main research questions:
+Using the data from the experiment described above, we seek answers to three research questions of interest:
 
 \begin{enumerate}
 \item Is seed terminal velocity predicted by seed shape parameters?
@@ -142,7 +142,7 @@ mod.2 <- lm(TV ~ SeedWidth + SeedArea, data = data.new)
 summary(mod.2)
 ```
 
-The results from the model selection can be seen below, along with the VIF for each term and AIC for each resulting model. All coefficients are significant to $\alpha < 0.001$.
+The results from the model selection can be seen below, along with the VIF for each term as well as both the AIC and $R^2$ for each resulting model. All coefficients are significant to $\alpha < 0.001$.
 
 ``` {r}
 mod.1.out <- cbind(c(summary(mod.1)$coefficients[1:3, 1], rep(NA, 2), summary(mod.1)$coefficients[4:5, 1]),
@@ -159,7 +159,7 @@ kable(mod.1.out, align = "r")
 
 ```
 
-As we can see in the table, the first three selection methods produced the exact same result, while the fourth method produced a result with fewer terms. While the model derived from the first three methods has a higher R^2 and lower AIC than the model derived from the fourth method, it suffers greatly from high VIC. Because the VIF on the second model is much lower that that of the first and the difference in R^2 is very small, we will proceed with the second model, effectively trading a small increase in the amount of unexplained variance for a large decrease in multicollinearity.
+As we can see in the table, the first three selection methods produced the exact same result, while the fourth method produced a result with fewer terms. While the model derived from the first three methods has a higher $R^2$ and lower AIC than the model derived from the fourth method, it suffers greatly from high VIC. Because the VIF on the second model is much lower that that of the first and the difference in $R^2$ is very small, we will proceed with the second model, effectively trading a small increase in the amount of unexplained variance for a large decrease in multicollinearity.
 
 ``` {r, include = FALSE}
 mod.3 <- lm(TV ~ SeedWidth, data = data.new)
@@ -172,12 +172,14 @@ However, we still see a rather high VIF for the `SeedWidth` and `SeedArea` terms
 mod.4 <- lm(TV ~ SeedWidth + I(SeedWidth^2), data = data.new)
 ```
 
-Comparing this to a single-term model where VIF is not an issue, we see that a model with only `SeedWidth` is not as good of a fit, with an R^2 of 0.3274 compared to 0.3804 for the quadratic model. This is also clear when plotting the models against the data, as can be see below:
+Comparing this to a single-term model where VIF is not an issue, we see that a model with only `SeedWidth` is not as good of a fit, with an $R^2$ of 0.3274 compared to 0.3804 for the quadratic model. This is also clear when plotting the models against the data, as can be see below:
 
 ``` {r, include = FALSE}
 summary(mod.3)
 summary(mod.4)
 ```
+
+We can also compare the distribution of residuals between the two models to check their validity. As can be seen below, the residuals are approximately normally-distributed for both models, with a bit of deviation from normality at the tails of the distribution.
 
 ``` {r}
 plot(TV ~ SeedWidth, data = data.new)
@@ -188,16 +190,18 @@ abline(mod.3, col = "deepskyblue", lwd = 2)
 remove(testdata)
 ```
 
+However, there are clearly differences regarding patterns of distribution in the residuals. For the model with only `SeedWidth`, there appears to be some curvature in the distribution of residuals, suggesting that an invalid model has been fit to the data. However, in the model with both linear and quadratic `SeedWidth` terms, the curved pattern in the residuals disappears, suggesting that this model is more valid.
+
 ``` {r, fig.height = 14, fig.width = 12}
 par(mfrow = c(2, 1))
-plot(mod.3, which = 2, cex = 2)
-plot(mod.4, which = 2, cex = 2)
+plot(mod.3, which = 2, cex.lab = 1.6, cex.axis = 1.4, main = NA)
+plot(mod.4, which = 2, cex.lab = 1.6, cex.axis = 1.4, main = NA)
 ```
 
 ``` {r, fig.height = 14, fig.width = 12}
 par(mfrow = c(2, 1))
-plot(mod.3, which = 1, cex = 2)
-plot(mod.4, which = 1, cex = 2)
+plot(mod.3, which = 1, cex.lab = 1.6, cex.axis = 1.4, main = NA)
+plot(mod.4, which = 1, cex.lab = 1.6, cex.axis = 1.4, main = NA)
 ```
 
 ``` {r, fig.height = 14, fig.width = 12}
