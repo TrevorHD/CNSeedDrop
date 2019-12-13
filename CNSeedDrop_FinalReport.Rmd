@@ -159,7 +159,7 @@ mod.1.out <- rbind(mod.1.out, c(rep(-1293.6, 3), -1288.4, rep(NA, 2)),
                               c(rep(summary(mod.1)$adj.r.squared, 3), summary(mod.2)$adj.r.squared, rep(NA, 2)))
 mod.1.out <- round(mod.1.out, digits = 4)
 dimnames(mod.1.out)[[1]] <- c(dimnames(mod.full.out)[[1]], "AIC", "R^2")
-dimnames(mod.1.out)[[2]] <- c("Method 1", "Method 2", "Method 3", "Method 4", "Method 1,2,3 VIF", "Method 4 VIF")
+dimnames(mod.1.out)[[2]] <- c("Method 1", "Method 2", "Method 3", "Method 4", "Model 1 VIF", "Model 2 VIF")
 kable(mod.1.out, align = "r", caption = "Table of the full model.")
 
 ```
@@ -171,20 +171,22 @@ mod.3 <- lm(TV ~ SeedWidth, data = data.new)
 anova(mod.2, mod.3)
 ```
 
-However, even in Model 2, we still see a rather high VIF for the `SeedWidth` and `SeedArea` terms. While the `SeedArea` term may be inflating coefficient estimates when added to `SeedWidth`, a partial *F*-test confirms that its addition is statistically significant (*F* = 32.43, *p* < 0.001). Since `SeedArea` is proportional to the square of `SeedWidth`, we can simply express it as as a quadratic term in a polynomial regression instead of using a separate `SeedArea` variable for it.
+However, even in Model 2, we still see a rather high VIF for the `SeedWidth` and `SeedArea` terms. While the `SeedArea` term may be inflating coefficient estimates when added to `SeedWidth`, a partial *F*-test confirms that its addition is statistically significant (*F* = 32.43, *p* < 0.001). Since `SeedArea` is proportional to the square of `SeedWidth`, we can simply express it as as a quadratic term in a polynomial regression instead of using a separate `SeedArea` variable for it. Let model 3 be the polynomial regression that replaces Model 2, and let model 4 be a reduced model such that:
 
-``` {r}
-mod.4 <- lm(TV ~ SeedWidth + I(SeedWidth^2), data = data.new)
-```
-
-Comparing this to a single-term model where VIF is not an issue, we see that a model with only `SeedWidth` is not as good of a fit, with an $R^2$ of 0.3274 compared to 0.3804 for the quadratic model. This is also clear when plotting the models against the data, as can be see below:
+\begin{itemize}
+\item Model 3: $Terminal Velocity = \beta_0 + \beta_1 SeedWidth$
+\item Model 4: $Terminal Velocity = \beta_0 + \beta_1 SeedWidth + \beta_2 SeedWidth^2$
+\end{itemize}
 
 ``` {r, include = FALSE}
+mod.4 <- lm(TV ~ SeedWidth + I(SeedWidth^2), data = data.new)
 summary(mod.3)
 summary(mod.4)
 ```
 
-We can also compare the distribution of residuals between the two models to check their validity. As can be seen below, the residuals are approximately normally-distributed for both models, with a bit of deviation from normality at the tails of the distribution.
+Comparing Model 4 to Model 3 (where VIF is not an issue), we see that the simpler Model 3 is not as good of a fit, with an $R^2$ of 0.3274 compared to 0.3804 for Model 4. This is also clear when plotting the models against the data, as can be seen in Figure \ref{fig:TVComparisonPlot}; there is clearly a curved pattern in the data points and Model 4 does a significantly better job of capturing it than Model 3.
+
+We can also compare the distribution of residuals between the two models to check their validity. As can be seen in Figure \ref{fig:R1ComparisonPlot}, the residuals are approximately normally-distributed for both models, with a bit of deviation from normality at the tails of the distribution. However, there are clearly differences regarding patterns of distribution in the residuals, as shown in Figure \ref{fig:R2ComparisonPlot} and Figure \ref{fig:R3ComparisonPlot}. For Model 3, there appears to be some curvature in the distribution of residuals, suggesting that an invalid model has been fit to the data. However, in Model 4, the curved pattern in the residuals disappears, suggesting that this model is more valid.
 
 ``` {r TVComparisonPlot, fig.cap = "\\label{fig:TVComparisonPlot} Plot of seed terminal velocity as a function of seed width. The two models are also plotted: the quadratic model (orange) and the linear model (blue).", fig.height = 6, fig.width = 10}
 plot(TV ~ SeedWidth, data = data.new)
@@ -194,8 +196,6 @@ with(testdata, lines(x = SeedWidth, y = TV, col = "chocolate1", lwd = 2))
 abline(mod.3, col = "deepskyblue", lwd = 2)
 remove(testdata)
 ```
-
-However, there are clearly differences regarding patterns of distribution in the residuals. For the model with only `SeedWidth`, there appears to be some curvature in the distribution of residuals, suggesting that an invalid model has been fit to the data. However, in the model with both linear and quadratic `SeedWidth` terms, the curved pattern in the residuals disappears, suggesting that this model is more valid.
 
 ``` {r R1ComparisonPlot, fig.cap = "\\label{fig:R1ComparisonPlot} Q-Q Plots comparing normality of the residuals in the linear model (left) and quadratic model (right).", fig.height = 14, fig.width = 12}
 par(mfrow = c(2, 1))
