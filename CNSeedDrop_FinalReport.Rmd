@@ -179,7 +179,7 @@ mod.1.out <- rbind(mod.1.out, c(-1293.6, -1288.4, rep(NA, 2)),
 #mod.1.out <- round(mod.1.out, digits = 4)
 dimnames(mod.1.out)[[1]] <- c(dimnames(mod.full.out)[[1]], "AIC", "$R^2$")
 dimnames(mod.1.out)[[2]] <- c("Methods 1-3", "Method 4", "Model 1 VIF", "Model 2 VIF")
-kable(mod.1.out, align = "r", caption = "\\label{tab:ModelComparisonTable} Estimates of the regression                                                  coefficients for Model 1 (resulting from methods 1-3) and Model 4                                               (resulting from method 4).")
+kable(mod.1.out, align = "r", caption = "\\label{tab:ModelComparisonTable} Estimates of the regression                                                  coefficients for Model 1 (resulting from methods 1-3) and Model 4                                               (resulting from method 4). 95% confidence intervals given in parentheses.")
 
 ```
 
