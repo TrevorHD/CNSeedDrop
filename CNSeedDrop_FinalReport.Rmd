@@ -158,7 +158,7 @@ mod.1.out <- cbind(c(summary(mod.1)$coefficients[1:3, 1], rep(NA, 2), summary(mo
 mod.1.out <- rbind(mod.1.out, c(rep(-1293.6, 3), -1288.4, rep(NA, 2)),
                               c(rep(summary(mod.1)$adj.r.squared, 3), summary(mod.2)$adj.r.squared, rep(NA, 2)))
 mod.1.out <- round(mod.1.out, digits = 4)
-dimnames(mod.1.out)[[1]] <- c(dimnames(mod.full.out)[[1]], "AIC", "R^2")
+dimnames(mod.1.out)[[1]] <- c(dimnames(mod.full.out)[[1]], "AIC", "$R^2$")
 dimnames(mod.1.out)[[2]] <- c("Method 1", "Method 2", "Method 3", "Method 4", "Model 1 VIF", "Model 2 VIF")
 kable(mod.1.out, align = "r", caption = "\\label{tab:ModelComparisonTable} Estimates of the regression                                                  coefficients for Model 1 (resulting from methods 1-3) and model 4                                               (resulting from method 4).")
 
@@ -227,7 +227,7 @@ The model resulting from this analysis suggests two things. First, pappus width 
 
 In addition to predicting seed terminal velocity based on the physical dimensions of the seed pappus, we are also interested in quantifying the extent to which two environmental effects (warming and mowing), affect seed terminal velocity.  Using the variation in termnal velocity across all six treatments shown in Figure \ref{fig:TVbarplot}, we can generate a preliminary hypothesis that warming increases terminal velocity while mowing decreases it. The following analysis determines whether such differences are statistically significant.
 
-```{r TVbarplot,fig.cap = "\\label{fig:TVbarplot}Terminal velocity for plants grown under warming and mowing treatments. Height of bar shows group mean, and error bars show one standard error. Actual data shown with black dots. Less data exist for late mowed plants, as many of them died."}
+```{r TVbarplot, fig.cap = "\\label{fig:TVbarplot}Terminal velocity for plants grown under warming and mowing treatments. Height of bar shows group mean, and error bars show one standard error. Actual data shown with black dots. Less data exist for late mowed plants, as many of them died."}
 barplot.dat = aggregate(data.new$TV, by = list(Mowing = data.new$Mow, Warming = data.new$Warming), FUN = function(x) c(mean(x),sd = sd(x), n = length(x)))
 barplot.dat = do.call(data.frame, barplot.dat)
 barplot.dat$SE = barplot.dat$x.sd / sqrt(barplot.dat$x.n)
@@ -304,7 +304,7 @@ Like the partial *F*-test, both AIC and BIC support the warming and mowing model
 ```{r TV_ANOVAResults}
 tab.dat = anova(mod.warm.log, mod.mowWarm.log, mod.int.log)
 tab.dat = data.frame(Model = c("Warming Only", "Warming and Mowing", "Interaction"), "P-Value" = round(tab.dat[,"Pr(>F)"],4))
-kable(tab.dat, caption = "\\label{tab:TV_ANOVAResults}Results of partial F-test comparing three models for predicting terminal velocity.")
+kable(tab.dat, caption = "\\label{tab:TV_ANOVAResults}Results of partial $F$-test comparing three models for predicting terminal velocity.")
 ```
 
 ```{r TV_AIC}
@@ -325,7 +325,7 @@ Model results are shown in Table \ref{tab:TV_ModelResults} and treatment level p
 ```{r TV_ModelResults}
 df = round(summary(mod.mowWarm.log)$coefficients[,c(1,4)],2)
 df[,1] = paste(df[,1], " (", round(confint(mod.mowWarm.log)[,1],2),", ",round(confint(mod.mowWarm.log)[,2],2),")", sep = "")
-kable(df, caption = "\\label{tab:TV_ModelResults}Estimated coefficients and  p-values for Warming and Mowing model. 95% confidence interval shown in parenthesis.")
+kable(df, caption = "\\label{tab:TV_ModelResults}Estimated coefficients and  $p$-values for Warming and Mowing model. 95% confidence interval shown in parenthesis.")
 ```
 
 ```{r TV_ANOVATrtEst, fig.height = 5, fig.width = 9, fig.cap="\\label{fig:TV_ANOVATrtEst}Results of best fitting ANOVA model, which included both warming and mowing as predictors. Square dots show mean predicted value and error bars show 95% confidence intervals."}
@@ -343,7 +343,7 @@ ggplot(data = mowWarm.dat, aes(x = Mow, color = Warming))+
 
 # Research Question 3
 
-Finally, we are also interested in exploring the extent to which the results of Research Question 2, or the changes in seed terminal velocity by treatment, can be explained by changes in seed width. We are investigating seed width specifically because the results of Research Question 1 show that seed width is a good predictor of terminal velocity. Figure \ref{fig:SWbarplot} shows the variation in seed width across treatments. 
+Finally, we are also interested in exploring the extent to which the results of Research Question 2, or the changes in seed terminal velocity by treatment, can be explained by changes in seed pappus width. We are investigating pappus width specifically because the results of Research Question 1 show that it is a good predictor of terminal velocity. Figure \ref{fig:SWbarplot} shows the variation in pappus width across treatments. 
 
 ```{r SWbarplot, fig.height = 5, fig.width = 9, fig.cap="\\label{fig:SWbarplot}Seed width by warming and mowing treatments. Height of bar shows group mean, and error bars show one standard error. Actual data shown with black dots."}
 barplot.dat = aggregate(data.new$SeedWidth, by = list(Mowing = data.new$MowYN, Warming = data.new$Warming), FUN = function(x) c(mean(x),sd = sd(x), n = length(x)))
@@ -361,7 +361,7 @@ ggplot(data = barplot.dat, aes(Mowing, Mean, fill = Warming))+
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())
 ```
 
-The data fitting methods used to address this question are similar to those of Research Question 2. We use partial *F*-tests and AIC/BIC analyses for model selection, but do not transform our response variable. First, we attempt to find the best fit of the four basic models - mowing only, warming only, warming and mowing, and interaction. 
+The data fitting methods used to address this question are similar to those of Research Question 2. We use partial *F*-tests and AIC/BIC analyses for model selection, but do not transform our response variable. First, we attempt to find the best fit of the four basic models: mowing only, warming only, warming and mowing, and interaction. 
 
 ```{r SW_ANOVA, include = FALSE}
 # warming
@@ -389,7 +389,7 @@ Here, the warming only model has a *p*-value of ```r round( pf(F.warm[1],F.warm[
 ```{r SW_ANOVAResults}
 tab.dat = anova(SW.mow, SW.mowWarm, SW.int)
 tab.dat = data.frame(Model = c("`Mowing Only`", "`Warming and Mowing`", "`Interaction`"), "P-Value" = round(tab.dat[,"Pr(>F)"],4))
-kable(tab.dat, caption = "\\label{tab:SW_ANOVAResults}Results of partial F-test for models predicting seed width by treatment.")
+kable(tab.dat, caption = "\\label{tab:SW_ANOVAResults}Results of partial $F$-test for models predicting seed width by treatment.")
 ```
 
 Again, we use AIC and BIC model selection criteria to validate these results. Table \ref{tab:SW_AIC} shows similar results to those in Research Question 2, suggesting that the warming and mowing model is the best fit.
@@ -401,31 +401,22 @@ AIC[2,3] = round(AIC[2,3],2)
 kable(AIC, caption = "\\label{tab:SW_AIC} AIC and BIC values for each of the four models predicting seed width.")
 ```
 
- Thus, both the partial F-test and the AIC/BIC values support the warming and mowing model, whose model diagnostic plots are shown in Figure \ref{fig:SW_Resids}. These residuals suggest the errors are approximately normally distributed. Again, there may be a few leverage points, though they do not have high influence. 
+Thus, both the partial *F*-test and the AIC/BIC values support the warming and mowing model, whose model diagnostic plots are shown in Figure \ref{fig:SW_Resids}. These residuals suggest the errors are approximately normally distributed. Again, there may be a few leverage points, though they do not have high influence. 
 
-
-```{r SW_Resids, fig.height=8,fig.width=10, fig.cap="\\label{fig:SW_Resids}Diagnostic plots for predicting seed width using `Warming and Mowing` model."}
+```{r SW_Resids, fig.height = 14, fig.width = 12, fig.cap="\\label{fig:SW_Resids}Diagnostic plots for predicting seed width using `Warming and Mowing` model."}
 par(mfrow = c(2,2))
 plot(SW.mowWarm)
 ```
 
-Table \ref{tab:SW_ModelResults} shows the results of the `Warming and Mowing` model for predicting seed width. These results suggest that both early mowing, late mowing, and warming signficantly decrease seed width. 
+Table \ref{tab:SW_ModelResults} shows the results of the warming and mowing model for predicting seed pappus width. These results suggest that both early mowing, late mowing, and warming signficantly decrease pappus width. 
 
 ```{r SW_ModelResults}
 df = round(summary(SW.mowWarm)$coefficients[,c(1,4)],2)
 df[,1] = paste(df[,1], " (", round(confint(SW.mowWarm)[,1],2),", ",round(confint(SW.mowWarm)[,2],2),")", sep = "")
-kable(df, caption = "\\label{tab:SW_ModelResults} Results of `Warming and Mowing` model for predicting seed width. Coefficient estiamtes, 95% confidence intervals and p-values are shown.")
+kable(df, caption = "\\label{tab:SW_ModelResults} Results of Warming and Mowing model for predicting seed width. Coefficient estiamtes, 95% confidence intervals and $p$-values are shown.")
 ```
 
-\
-To investigate the pairwise comparisons between each group, we performed a post-hoc Tukey HSD test (Figure \ref{fig:SW_Tukey}). 
-
-```{r SW_Tukey, fig.width = 5.8, fig.cap="\\label{fig:SW_Tukey}Results of post-hoc Tukey HSD test. Letters indicate groups which are significantly different, where 0.05 is the significance level. Notation is as follows: CTL - no mowing, E - early mowing, L - late mowing; A - ambient (i.e. no warming), W - warming"}
-out = HSD.test(aov(SeedWidth ~ Mow + Warming + Mow:Warming, data= data.new), c("Mow","Warming"))
-bar.group(out$groups, ylim = c(0,25), xlab = "Mowing", ylab = "Seed Width", main = "Tukey HSD")
-```
-
-These results suggest that there are two major groups which emerge: (1) non-mowed, control plants regardless of whether they were warmed and (2) warmed plants that were mowed, regardless of the timing of the mowing. Because the timing of the mowing does not appear to be a significant factor in determining seed width, we fit a second model predicting seed width based on warming and a binary mowing variable.  
+To investigate the pairwise comparisons between each group, we performed a post-hoc Tukey HSD test (Figure \ref{fig:SW_Tukey}). The results from this test suggest that there are two major groups which emerge: (1) non-mowed, control plants regardless of whether they were warmed and (2) warmed plants that were mowed, regardless of the timing of the mowing. Because the timing of the mowing does not appear to be a significant factor in determining pappus width, we fit a second model predicting pappus width based on warming and a binary mowing variable.  
 
 ```{r SWbin_ANOVA, include = FALSE}
 # warming
@@ -450,19 +441,19 @@ summary(SWbin.int)
 
 ```{r SWbin_ANOVAResults}
 tab.dat = anova(SWbin.mow, SWbin.mowWarm, SWbin.int)
-tab.dat = data.frame(Model = c("`Warming Only`", "`Warming and Mowing`", "`Interaction`"), "P-Value" = round(tab.dat[,"Pr(>F)"],4))
-kable(tab.dat, caption = "\\label{tab:SWbin_ANOVAResults}Results of partial F-test performed for models predicting seed width using warming and binary mowing predictors.")
+tab.dat = data.frame(Model = c("Warming Only", "Warming and Mowing", "Interaction"), "P-Value" = round(tab.dat[,"Pr(>F)"],4))
+kable(tab.dat, caption = "\\label{tab:SWbin_ANOVAResults}Results of partial $F$-test performed for models predicting seed width using warming and binary mowing predictors.")
 ```
 
 ```{r SWbin_AIC}
-AIC = data.frame(Model =  c("`Mowing Only`","`Warming Only`", "`Warming and Mowing`", "`Interaction`"), AIC = c(AIC(SWbin.mow), AIC(SWbin.warm), AIC(SWbin.mowWarm), AIC(SWbin.int)), BIC = c(AIC(SWbin.mow, k = log(length(data.new))), AIC(SWbin.warm,k = log(length(data.new))), AIC(SWbin.mowWarm, k = log(length(data.new))), AIC(SWbin.int,k = log(length(data.new)))))
+AIC = data.frame(Model =  c("Mowing Only","Warming Only", "Warming and Mowing", "Interaction"), AIC = c(AIC(SWbin.mow), AIC(SWbin.warm), AIC(SWbin.mowWarm), AIC(SWbin.int)), BIC = c(AIC(SWbin.mow, k = log(length(data.new))), AIC(SWbin.warm,k = log(length(data.new))), AIC(SWbin.mowWarm, k = log(length(data.new))), AIC(SWbin.int,k = log(length(data.new)))))
 AIC[2,3] = round(AIC[2,3],2)
 kable(AIC, caption = "\\label{tab:SWbin_AIC}AIC and BIC for models predicting seed width using warming and binary mowing predictors.")
 ```
 
 Discerning between the warming and mowing and the interaction models is less clear in this case. On one hand, the partial *F*-test suggests the interaction model may provide a slightly better fit (Table \ref{tab:SWbin_ANOVAResults}) and the interaction model has the lowest AIC value (Table \ref{tab:SWbin_AIC}), but the warming and mowing model has the lowest BIC value (Table \ref{tab:SWbin_AIC}). This result is consistent with our expectations, as a slight improvement in model fit may not be enough to overcome the BIC penalty for an additional term in the interaction model. 
 
-The results of both models are summarized in Table \ref{tab:SWbin_ModelResults}. In the warming and mowing model, both treatments decrease seed width; whereas when an interaction term is added, neither the warming nor mowing terms are significant, but the interaction term itself becomes significant at a significance level of 0.1.  
+The results of both models are summarized in Table \ref{tab:SWbin_ModelResults}. In the warming and mowing model, both treatments decrease pappus width; whereas when an interaction term is added, neither the warming nor mowing terms are significant, but the interaction term itself becomes significant at a significance level of 0.1.  
 
 ```{r SWbin_ModelResults}
 df1 = round(summary(SWbin.mowWarm)$coefficients[,c(1,4)],4)
@@ -471,21 +462,25 @@ df2 = round(summary(SWbin.int)$coefficients[,c(1,4)],4)
 rownames(df2) = c("Intercept", "Mow", "Warm", "Mow:Warm")
 df = cbind(rbind(df1,rep(NA,times = 2)), df2)
 rownames(df) = c("Intercept", "Mow", "Warm", "Mow:Warm")
-colnames(df) = c("`Warming and Mowing` Estimate", "Pr(>|t|)", "`Interaction` Estimate", "Pr(>|t|)")
+colnames(df) = c("Warming and Mowing Estimate", "Pr(>|t|)", "Interaction Estimate", "Pr(>|t|)")
 df[,1] = paste(df[,1], " (", round(confint(SWbin.mowWarm)[,1],2),", ",round(confint(SWbin.mowWarm)[,2],2),")", sep = "")
 df[,3] = paste(df[,3], " (", round(confint(SWbin.int)[,1],2),", ",round(confint(SWbin.int)[,2],2),")", sep = "")
 df[4,1]=  NA
-kable(df, caption = "\\label{tab:SWbin_ModelResults}Results of `Warming and Mowing` and  `Interaction` models, respectively.")
+kable(df, caption = "\\label{tab:SWbin_ModelResults}Results of Warming and Mowing and Interaction models, respectively.")
 ```
 
-These two results suggest that plants which are both warmed and mowed have smaller seed width. Plants which are both warmed and mowed are likely driving the significant mowing and warming coefficients we see in the warming and mowing model. Another post-hoc Tukey test, shown in Figure \ref{fig:SWbin_Tukey}, supports this conclusion. 
+These two results suggest that plants which are both warmed and mowed have smaller pappus width. Plants which are both warmed and mowed are likely driving the significant mowing and warming coefficients we see in the warming and mowing model. Another post-hoc Tukey test, shown in Figure \ref{fig:SWbin_Tukey}, supports this conclusion. 
 
-```{r SWbin_Tukey, fig.cap="\\label{fig:SWbin_Tukey}Results of post-hoc Tukey HSD test. Letters indicate groups which are significantly different, where 0.05 is the significance level. Notation is as follows: CTL - no mowing, M - mowing; A - ambient (i.e. no warming), W - warming"}
+```{r SW_Tukey, fig.width = 7, fig.height = 4, fig.cap = "\\label{fig:SW_Tukey}Results of post-hoc Tukey HSD test. Letters indicate groups which are significantly different, where 0.05 is the significance level. Notation is as follows: CTL - no mowing, E - early mowing, L - late mowing; A - ambient (i.e. no warming), W - warming"}
+out = HSD.test(aov(SeedWidth ~ Mow + Warming + Mow:Warming, data= data.new), c("Mow","Warming"))
+bar.group(out$groups, ylim = c(0,25), xlab = "Mowing", ylab = "Seed Width", main = "Tukey HSD")
+```
+
+```{r SWbin_Tukey, fig.width = 7, fig.height = 4, fig.cap="\\label{fig:SWbin_Tukey}Results of post-hoc Tukey HSD test. Letters indicate groups which are significantly different, where 0.05 is the significance level. Notation is as follows: CTL - no mowing, M - mowing; A - ambient (i.e. no warming), W - warming"}
 out = HSD.test(aov(SeedWidth ~ MowYN + Warming + MowYN:Warming, data= data.new), c("MowYN","Warming"))
 rownames(out$groups) = c("CTL:A", "CTL:W", "M:A", "M:W")
 bar.group(out$groups, ylim = c(0,25), xlab = "Mowing", ylab = "Seed Width", main = "Tukey HSD")
 ```
-
 
 # Discussion
 
