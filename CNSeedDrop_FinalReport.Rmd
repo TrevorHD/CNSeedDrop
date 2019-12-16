@@ -79,7 +79,7 @@ Using the data from the experiment described above, we seek answers to three res
 \begin{enumerate}
 \item Is seed terminal velocity predicted by the shape of the seed pappus?
 \item To what extent do warming and mowing treatments change seed terminal velocity?
-\item Can changes in terminal velocity by treatment be explained by changes in seed shape parameters?
+\item Can changes in seed terminal velocity by treatment be explained by changes in pappus shape?
 \end{enumerate}
 
 # Research Question 1 
@@ -221,11 +221,11 @@ abline(h = 0, col = "red")
 abline(h = c(-2, 2), col = "red", lty = 3)
 ```
 
-The model resulting from this analysis suggests two things. First, pappus width is the most important aspect of pappus shape in determining seed terminal velocity; while other aspects of the pappus shape may be used to predict seed terminal velocity, they are not particularly helpful when pappus width is already considered. Second, seed terminal velocity is negatively correlated with pappus width: terminal velocity decreases as pappus width increases, and vice-versa.
+The model resulting from this analysis suggests two things. First, pappus width is the most important aspect of pappus shape in determining seed terminal velocity; while other aspects of the pappus shape may be used to predict seed terminal velocity, they are not particularly helpful when pappus width is already considered. Second, there is a significant negative correlation between pappus width and seed terminal velocity.
 
 # Research Question 2
 
-In addition to predicting seed terminal velocity based on the physical dimensions of the seed pappus, we are also interested in quantifying the extent to which two environmental effects, warming and mowing, affect seed terminal velocity.  Using the variation in termnal velocity across all six treatments shown in Figure \ref{fig:TVbarplot}, we can generate a preliminary hypothesis that warming increases terminal velocity while mowing decreases it. The following analysis determines whether such differences are statistically significant.
+In addition to predicting seed terminal velocity based on the physical dimensions of the seed pappus, we are also interested in quantifying the extent to which two environmental effects (warming and mowing), affect seed terminal velocity.  Using the variation in termnal velocity across all six treatments shown in Figure \ref{fig:TVbarplot}, we can generate a preliminary hypothesis that warming increases terminal velocity while mowing decreases it. The following analysis determines whether such differences are statistically significant.
 
 ```{r TVbarplot,fig.cap = "\\label{fig:TVbarplot}Terminal velocity for plants grown under warming and mowing treatments. Height of bar shows group mean, and error bars show one standard error. Actual data shown with black dots. Less data exist for late mowed plants, as many of them died."}
 barplot.dat = aggregate(data.new$TV, by = list(Mowing = data.new$Mow, Warming = data.new$Warming), FUN = function(x) c(mean(x),sd = sd(x), n = length(x)))
@@ -242,7 +242,7 @@ ggplot(data = barplot.dat, aes(Mowing, Mean, fill = Warming))+
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())
 ```
 
-Because we are fitting a continutous response variable to categorical predictor variables, we can use an ANOVA model to characterize changes in terminal velocity by treatment. In order to compensate for the skewed right distribution of the terminal velocity data and significant deviations from error normality (Figure \ref{fig:TVHistAndErrors}), we log-transform terminal velocity for this analysis. 
+Because we are fitting a continutous response variable to categorical predictor variables, we can use an ANOVA model to characterize changes in terminal velocity by treatment. In order to compensate for the skewed right distribution of the terminal velocity data and significant deviations from error normality (Figure \ref{fig:TVHistAndErrors}), we log-transform terminal velocity for this analysis. We use two methods to identify the most appropriate model fit for the log-transformed terminal velocity data, starting by fitting the following four models:
 
 ```{r TVHistAndErrors,fig.height = 3 ,fig.cap = "\\label{fig:TVHistAndErrors} Histogram of terminal velocity (A) and Normal Q-Q plot of linear model with both warming and mowing predictors (B)."}
 
@@ -266,8 +266,6 @@ grid.arrange(p1, p2, nrow = 1)
 
 ```
 
-We use two methods to identify the most appropriate model fit for the log-transformed terminal velocity data, starting by fitting the following four models:
-
 \begin{itemize}
 \item `Mowing Only`: $Terminal Velcotiy = \beta_0 + \beta_1 Mow$
 \item `Warming Only`: $Terminal Velocity = \beta_0  + \beta_1 Warm$
@@ -275,7 +273,7 @@ We use two methods to identify the most appropriate model fit for the log-transf
 \item `Interaction`: $Terminal Velocity = \beta_0 + \beta_1 Mow+ \beta_2 Warm + \beta_3 Warm \cdot Mow $
 \end{itemize}
 
-We use model *p*-values for the `Mowing Only` and `Warming Only` models to establish which provide a better fit for the data. Then, with the better fitting model as a base, we perform a partial *F*-test to identify whether additional variables significantly improve model fit. Second, to validate the results of the partial *F*-test, we evaluate both the AIC and BIC for each model. 
+We use model *p*-values for the mowing only and warming only models to establish which provide a better fit for the data. Then, with the better fitting model as a base, we perform a partial *F*-test to identify whether additional variables significantly improve model fit. Second, to validate the results of the partial *F*-test, we evaluate both the AIC and BIC for each model. 
 
 ```{r ByTreatment_ANOVA_log, include = FALSE}
 # warming
@@ -299,28 +297,27 @@ summary(mod.int.log)
 
 ```
 
-Here, the `Warming Only` model has a *p*-value of ```r round(pf(F.warm[1],F.warm[2],F.warm[3],lower.tail=F),4)``` whereas the `Mowing Only` model has a *p*-value of ```r  round(pf(F.mow[1],F.mow[2],F.mow[3],lower.tail=F),4)```. Therefore, we use the `Warming Only` model as the base model in our partial *F*-test. Results, shown in Table \ref{tab:TV_ANOVAResults}, suggest that the `Warming and Mowing` model is the best fit for the data. 
+Here, the warming only model has a *p*-value of ```r round(pf(F.warm[1],F.warm[2],F.warm[3],lower.tail=F),4)``` whereas the mowing only model has a *p*-value of ```r  round(pf(F.mow[1],F.mow[2],F.mow[3],lower.tail=F),4)```. Therefore, we use the warming only model as the base model in our partial *F*-test. Results, shown in Table \ref{tab:TV_ANOVAResults}, suggest that the warming and mowing model is the best fit for the data.
+
+Like the partial *F*-test, both AIC and BIC support the warming and mowing model (Table \ref{tab:TV_AIC}). Thus, we conclude that the warming and mowing model is the best fit for the log-transformed terminal velocity data.
 
 ```{r TV_ANOVAResults}
 tab.dat = anova(mod.warm.log, mod.mowWarm.log, mod.int.log)
-tab.dat = data.frame(Model = c("`Warming Only`", "`Warming and Mowing`", "`Interaction`"), "P-Value" = round(tab.dat[,"Pr(>F)"],4))
+tab.dat = data.frame(Model = c("Warming Only", "Warming and Mowing", "Interaction"), "P-Value" = round(tab.dat[,"Pr(>F)"],4))
 kable(tab.dat, caption = "\\label{tab:TV_ANOVAResults}Results of partial F-test comparing three models for predicting terminal velocity.")
 ```
 
-Like the partial *F*-test, both AIC and BIC support the `Warming and Mowing` model (Table \ref{tab:TV_AIC}). Thus, we conclude that $Terminal Velocity = \beta_0 + \beta_1 Mowing+ \beta_2  Warming$ is the best model fit for the log-transformed terminal velocity data.
-
 ```{r TV_AIC}
-AIC = data.frame(Model =  c("`Mowing Only`","`Warming Only`", "`Warming and Mowing`", "`Interaction`"), AIC = c(AIC(mod.mow.log), AIC(mod.mow.log), AIC(mod.mowWarm.log), AIC(mod.int.log)), BIC = c(AIC(mod.mow.log, k = log(length(data.new))), AIC(mod.mow.log,k = log(length(data.new))), AIC(mod.mowWarm.log, k = log(length(data.new))), AIC(mod.int.log,k = log(length(data.new)))))
+AIC = data.frame(Model =  c("Mowing Only","Warming Only", "Warming and Mowing", "Interaction"), AIC = c(AIC(mod.mow.log), AIC(mod.mow.log), AIC(mod.mowWarm.log), AIC(mod.int.log)), BIC = c(AIC(mod.mow.log, k = log(length(data.new))), AIC(mod.mow.log,k = log(length(data.new))), AIC(mod.mowWarm.log, k = log(length(data.new))), AIC(mod.int.log,k = log(length(data.new)))))
 AIC[2,3] = round(AIC[2,3],2)
 kable(AIC, caption = "\\label{tab:TV_AIC}AIC and BIC values for each model.")
 ```
 
-The residuals for the `Warming and Mowing` model are shown in Figure \ref{fig:TV_Resids}. There do not appear to be any obvious patterns in the residuals, and though there are a few points with high leverage, they are not extremely influential according to Cook's distance. Lastly, it is evident that log-transformation significantly improves the normality of the errors, as can be seen in the Normal Q-Q plot. 
+The residuals for the warming and mowing model are shown in Figure \ref{fig:TV_Resids}. There do not appear to be any obvious patterns in the residuals, and though there are a few points with high leverage, they are not extremely influential according to Cook's distance. Lastly, it is evident that log-transformation significantly improves the normality of the errors, as can be seen in the Normal Q-Q plot. 
 
-
-```{r TV_Resids, fig.height=8, fig.cap="\\label{fig:TV_Resids}Diagnostic plots for `Warming and Mowing` model."}
+```{r TV_Resids, fig.height = 14, fig.width = 12, fig.cap="\\label{fig:TV_Resids}Diagnostic plots for Warming and Mowing model."}
 par(mfrow = c(2,2))
-plot(mod.mowWarm.log)
+plot(mod.mowWarm.log, cex.lab = 1.6, cex.axis = 1.4)
 ```
 
 Model results are shown in Table \ref{tab:TV_ModelResults} and treatment level predictions are shown in Figure \ref{fig:TV_ANOVATrtEst}. From these results, we conclude that early mowing significnatly decreases terminal velocity, whereas warming increases terminal velocity. 
@@ -328,7 +325,7 @@ Model results are shown in Table \ref{tab:TV_ModelResults} and treatment level p
 ```{r TV_ModelResults}
 df = round(summary(mod.mowWarm.log)$coefficients[,c(1,4)],2)
 df[,1] = paste(df[,1], " (", round(confint(mod.mowWarm.log)[,1],2),", ",round(confint(mod.mowWarm.log)[,2],2),")", sep = "")
-kable(df, caption = "\\label{tab:TV_ModelResults}Estimated coefficients and  p-values for `Warming and Mowing` model. 95% confidence interval shown in parenthesis.")
+kable(df, caption = "\\label{tab:TV_ModelResults}Estimated coefficients and  p-values for Warming and Mowing model. 95% confidence interval shown in parenthesis.")
 ```
 
 ```{r TV_ANOVATrtEst, fig.cap="\\label{fig:TV_ANOVATrtEst}Results of best fitting ANOVA model, which included both warming and mowing as predictors. Square dots show mean predicted value and error bars show 95% confidence intervals."}
@@ -343,8 +340,6 @@ ggplot(data = mowWarm.dat, aes(x = Mow, color = Warming))+
   theme_bw()+
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())
 ```
-
-
 
 # Research Question 3
 Next, we will explore the extent to which the results of Research Question 2, or the changes in terminal velocity by treatment, can be explained by changes in seed width. We are investigating seed width specifically because the results of Research Question 1 show that seed width is a good predictor of terminal velocity. Figure \ref{fig:SWbarplot} shows the variation in seed width across treatments. 
@@ -365,9 +360,7 @@ ggplot(data = barplot.dat, aes(Mowing, Mean, fill = Warming))+
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())
 ```
 
-
 Our data fitting methods are similar to those of Research Question 2. We use partial F-tests and AIC/BIC analyses for model selection, but did not transform our response variable. First, we analyze the fit of the four basic models - mowing only, warming only, warming and mowing, and interaction - to identify which model is the best fit. 
-
 
 ```{r SW_ANOVA, include = FALSE}
 # warming
