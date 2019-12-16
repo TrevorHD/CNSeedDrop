@@ -48,7 +48,7 @@ data %>% mutate(SeedAngle = acos(1 - ((SeedWidth^2)/(2*(SeedLength^2)))),
 data.new <- data[complete.cases(data[ , 23:25]), ]
 
 # Need unique plot indicators by block - plot 1 and plot 2 are not similar in any way across blocks
-data.new$PlotUnique = as.factor(paste(data.new$Block,"_",data.new$Plot))
+data.new$PlotUnique = as.factor(paste(data.new$Block, "_", data.new$Plot))
 # use PlantID for position
 
 # Create a mowing y/n flag
@@ -56,7 +56,7 @@ data.new$MowYN = ifelse(data.new$Mow == "CTL", 0, 1)
 ```
 
 # Abstract
-The invasive thistle *Carduus nutans* has been a management concern for landowners and governments alike, with dispersal in this plant playing an important role in its spread. Given that the terminal velocity of *C. nutans* seeds strongly influences dispersal distance, we seek to beter understand how both pappus shape and treatment of the parent plant affect seed terminal velocity. Our analyses show that the width of the seed pappus was the most important factor in determining seed terminal velocity and that the two were negatively correlated, with higher pappus width generally giving rise to a lower terminal velocity. Warming and mowing treatments on the parent plants had significant effects on the pappus width, with warmed and mowed plants having a much smaller pappus width. Regarding the effects of the treatments on seed terminal velocity, early mowing increased terminal velocity, while warming decreased terminal velocity; no significant effect was observed for late mowed plants compared to control plants. Given that mowing was shown to increase pappus width and that increased pappus width was shown to reduce terminal velocity, it is surprising that plants experiencing the early mowing treatment had higher seed terminal velocity. Such a contridiction merits further investigation of additional factors, such as mass, that may affect seed terminal velocity.
+The invasive thistle *Carduus nutans* has been a management concern for landowners and governments alike, with dispersal in this plant playing an important role in its spread. Given that the terminal velocity of *C. nutans* seeds strongly influences dispersal distance, we seek to beter understand how both pappus shape and treatment of the parent plant affect seed terminal velocity. Our analyses show that the width of the seed pappus was the most important factor in determining seed terminal velocity and that the two were negatively correlated, with higher pappus width generally giving rise to a lower terminal velocity. Warming and mowing treatments on parent plants had significant effects on the pappus width, with warmed and mowed plants having a much smaller pappus width. Regarding the effects of the treatments on seed terminal velocity, early mowing increased terminal velocity, while warming decreased terminal velocity; no significant effect was observed for late mowed plants compared to control plants. Given that mowing was shown to increase pappus width and that increased pappus width was shown to reduce terminal velocity, it is surprising that plants experiencing the early mowing treatment had higher seed terminal velocity. Such a contridiction warrants further investigation of additional factors, such as mass, that may affect seed terminal velocity.
 
 # Introduction and Data
 
@@ -68,11 +68,11 @@ One particular invasive species that has greatly expanded its range due to human
 
 Another reason why there is concern over *C. nutans* is because it has a high potential to spread locally when introduced. This thistle is wind dispersed and seeds have a large pappus, or a feathery and lightweight modified calyx, on the seeds that allows them to be transported great distances. Models have been proposed to model such wind-driven seed dispersal$^3$, and such models have been applied to *C. nutans*$^4$, showing significant potential for long-range dispersal events. While there are abiotic and biotic factors that affect how far a seed like those in *C. nutans* can be dispersed, a noteworthy predictor of dispersal distance is seed terminal velocity. For seeds, a higher terminal velocity generally means a decreased dispersal distance; this is because a higher terminal velocity means the seed falls faster and thus spends less time in the air, which means less of an opportunity for wind to carry it further from its source.
 
-However, it is not entirely clear what affects terminal velocity in *C. nutans* seeds, though the most obvious candidates would be physical properties of the seed such as shape and mass. In general, seeds with a larger area perpendicular to the direction of motion will have higher drag and a lower terminal velocity. Seeds with a higher mass will have a higher downward force (*mg*) from gravity and thus a higher air resistance force that must equal it to achieve terminal velocity, which leads to a higher terminal velocity since said resistance force is proportional to that velocity. However, the physical properties of the seed may be affected by the morphology and physiology of the parent plant; abiotic and biotic factors can affect the parent plant in such a way that may ultimately influence the terminal velocity of its seeds.
+However, it is not entirely clear what affects terminal velocity in *C. nutans* seeds, though the most obvious candidates would be physical properties of the seed such as shape and mass. In general, seeds with pappi that have a larger area perpendicular to the direction of motion will have higher drag and a lower terminal velocity. Seeds with a higher mass will have a higher downward force (*mg*) from gravity and thus a higher air resistance force that must equal it to achieve terminal velocity, which leads to a higher terminal velocity since said resistance force is proportional to that velocity. However, the physical properties of the seed may be affected by the morphology and physiology of the parent plant; abiotic and biotic factors can affect the parent plant in such a way that may ultimately influence the terminal velocity of its seeds.
 
 Given that there may be a link between abiotic influences on *C. nutans* and the terminal velocity of its seeds, we wish to investigate whether certain treatments applied to the plant before it flowers have any effect on seed dispersal capabilities. Any treatment effects that can reduce the dispersal capability of these thistles may then be used to inform management decisions. By using mowing treatments as well as warming treatments (and combinations of the two), we will examine the effects of said treatments on seed terminal velocity and thus on dispersal capability.
 
-The data used to assess the effects of mowing and warming on seed terminal velocity were collected during a field experiment that involved applying these treatments to parent plants and collecting their flower heads aftey they had set seed. The experimental setup involves ten blocks, with each block containing two plots: one plot with a warming treatment and one without. Within each plot there are three positions: one with an early mowing treatment, one with a late mowing treatment, and one with no mowing at all. Overall, this yields six unique combinations of warming and mowing, with 10 replicates for each combination. Ten seeds were planted at each position, and one flower head was harvested from all individuals that survived to harvest date. Seeds were collected from individual flower heads and their terminal velocities were determined by timing the amount of time it took them to afll through a 1.25-m drop chamber. For each seed, these drop tests were repeated until two consecutive drop times were recorded within 0.1 seconds of each other.
+The data used to assess the effects of mowing and warming on seed terminal velocity were collected during a field experiment that involved applying these treatments to parent plants and collecting their flower heads aftey they had set seed. The experimental setup involves ten blocks, with each block containing two plots: one plot with a warming treatment and one without. Within each plot there are three positions: one with an early mowing treatment, one with a late mowing treatment, and one with no mowing at all. Overall, this yields six unique combinations of warming and mowing, with 10 replicates for each combination. Ten seeds were planted at each position, and one flower head was harvested from all individuals that survived to harvest date. Seeds were collected from individual flower heads and their terminal velocities were determined by recording the amount of time it took them to fall through a 1.25-m drop chamber. For each seed, these drop tests were repeated until two consecutive drop times were recorded within 0.1 seconds of each other.
 
 Using the data from the experiment described above, we seek answers to three research questions of interest:
 
@@ -92,19 +92,19 @@ data.new <- data.new[-which(is.nan(data.new[, 36])), ]
 First, we begin by investigating how pappus dimensions affect seed terminal velocity, with a total of six different measurements on the pappus used as predictors. The first two measurements are `SeedWidth` and `SeedLength`, which are respectively the basal width and slant height of a cone-shaped pappus. These measurements are empirically derived and are both measured in millimetres. Four additional measurements are calculated using `SeedWidth` and `SeedLength` and are as follows:
 
 \begin{enumerate}
-\item `SeedAngle`, the vertex angle of the conical pappus (radians)
-\item `SeedArea`, the basal area of the conical pappus (mm$^2$)
-\item `SeedHeight`, the height of the conical pappus (mm)
-\item `SeedVol`, the volume of the conical pappus (mm$^3$)
+\item SeedAngle, the vertex angle of the conical pappus (radians)
+\item SeedArea, the basal area of the conical pappus (mm$^2$)
+\item SeedHeight, the height of the conical pappus (mm)
+\item SeedVol, the volume of the conical pappus (mm$^3$)
 \end{enumerate}
 
 Before any models are fit to the data, we first examine correlations between the various pappus measurements given above. A `pairs` plot of terminal velocity and the various physical properties can be seen in Figure \ref{fig:TVPairsPlot}. Linear associations between the variables can also be seen in Figure \ref{fig:TVCorrPlot}, with both the strength and directions of the correlations shown.
 
-``` {r TVPairsPlot, fig.cap = "\\label{fig:TVPairsPlot} Pairs plot of relationships between variables considered in this analysis.", fig.height = 6, fig.width = 10}
+``` {r TVPairsPlot, fig.height = 6, fig.width = 10, fig.cap = "\\label{fig:TVPairsPlot} Pairs plot of relationships between variables considered in this analysis."}
 pairs(data.new[, c("TV", "SeedLength", "SeedWidth", "SeedAngle", "SeedArea", "SeedHeight", "SeedVol")])
 ```
 
-``` {r TVCorrPlot, fig.cap = "\\label{fig:TVCorrPlot} Linear correlations between variables considered in this analysis.", fig.height = 6, fig.width = 10}
+``` {r TVCorrPlot, fig.height = 6, fig.width = 10, fig.cap = "\\label{fig:TVCorrPlot} Linear correlations between variables considered in this analysis."}
 corrplot(cor(data.new[, c("TV", "SeedLength", "SeedWidth", "SeedAngle", "SeedArea", "SeedHeight", "SeedVol")]),
          method = "number", type = "lower", tl.pos = "n", cl.pos = "n", tl.col = "black")
 corrplot(cor(data.new[, c("TV", "SeedLength", "SeedWidth", "SeedAngle", "SeedArea", "SeedHeight", "SeedVol")]),
@@ -123,7 +123,7 @@ mod.full.out <- as.data.frame(cbind(round(summary(mod.full)$coefficients, digits
                                     c("***", "**", ".", "", "", "", "*")))
 dimnames(mod.full.out)[[2]] <- c("Estimate", "Std. Error", "t value", "Pr(>|t|)",
                                  "VIF", "Significance")
-kable(mod.full.out, align = "r", caption = "\\label{tab:FullModelTable} Estimates of the regression coefficients                                             and associated measurements for the full model. Terms with at least                                             one asterisk are significant the 0.05 level.")
+kable(mod.full.out, align = "r", caption = "\\label{tab:FullModelTable} Estimates of the regression coefficients                                             and associated measurements for the full model. Terms with at least                                             one asterisk are significant at the 0.05 level.")
 ```
 
 Given that some of these variables must be removed to improve the fit of the model, we now perform variable selection on the full model to reduce clutter. The first method of selection is backwards selection starting from the full model above, which involves removing subsequent variables based on their *p*-value; the variable with the highest *p*-value is removed, the resulting model re-examined, and the process repeated until all predictors were significant at $\alpha = 0.05$. The second method of selection involves backwards selection from the full model using AIC (Akaike's information), where terms are removed until the AIC of the model is minimised. The third mehtod of selection starts from the full model and uses the `step` selection function in both directions, while the fourth method starts from the null model and added terms; again, in both cases, the selection continues until the AIC of the model is minimised. The results from the model selection can be found in Table \ref{tab:ModelComparisonTable}, along with the VIF for each term as well as both the AIC and $R^2$ for each resulting model. All coefficients are significant to $\alpha < 0.001$.
@@ -188,8 +188,9 @@ Comparing Model 4 to Model 3 (where VIF is not an issue), we see that the simple
 
 We can also compare the distribution of residuals between the two models to check their validity. As can be seen in Figure \ref{fig:R1ComparisonPlot}, the residuals are approximately normally-distributed for both models, with a bit of deviation from normality at the tails of the distribution. However, there are clearly differences regarding patterns of distribution in the residuals, as shown in Figure \ref{fig:R2ComparisonPlot} and Figure \ref{fig:R3ComparisonPlot}. For Model 3, there appears to be some curvature in the distribution of residuals, suggesting that an invalid model has been fit to the data. However, in Model 4, the curved pattern in the residuals disappears, suggesting that this model is more valid.
 
-``` {r TVComparisonPlot, fig.cap = "\\label{fig:TVComparisonPlot} Plot of seed terminal velocity as a function of pappus width. The two models are also plotted: the quadratic model (orange) and the linear model (blue).", fig.height = 6, fig.width = 10}
-plot(TV ~ SeedWidth, data = data.new, cex.lab = 1.4, cex.axis = 1.2)
+``` {r TVComparisonPlot, fig.height = 6, fig.width = 10, fig.cap = "\\label{fig:TVComparisonPlot} Plot of seed terminal velocity as a function  of pappus width. The two models are also plotted: the quadratic model (orange) and the linear model (blue)."}
+plot(TV ~ SeedWidth, data = data.new, cex.lab = 1.4, cex.axis = 1.2, xlab = "Seed Pappus Width (mm)",
+     ylab = "Terminal Velocity (m/s)")
 testdata <- data.frame(SeedWidth = seq(min(data.new$SeedWidth), max(data.new$SeedWidth), length.out = 300))
 testdata$TV = predict(mod.4, newdata = testdata)
 with(testdata, lines(x = SeedWidth, y = TV, col = "chocolate1", lwd = 2))
@@ -197,19 +198,19 @@ abline(mod.3, col = "deepskyblue", lwd = 2)
 remove(testdata)
 ```
 
-``` {r R1ComparisonPlot, fig.cap = "\\label{fig:R1ComparisonPlot} Q-Q Plots comparing normality of the residuals in the linear model (top) and quadratic model (bottom).", fig.height = 14, fig.width = 12}
+``` {r R1ComparisonPlot, fig.height = 14, fig.width = 12, fig.cap = "\\label{fig:R1ComparisonPlot} Q-Q Plots comparing normality of the residuals in the linear model (top) and quadratic model (bottom)."}
 par(mfrow = c(2, 1))
 plot(mod.3, which = 2, cex.lab = 1.6, cex.axis = 1.4, main = NA)
 plot(mod.4, which = 2, cex.lab = 1.6, cex.axis = 1.4, main = NA)
 ```
 
-``` {r R2ComparisonPlot, fig.cap = "\\label{fig:R2ComparisonPlot} Comparison of residual distributions as a function of fitted values in the linear model (top) and quadratic model (bottom).", fig.height = 14, fig.width = 12}
+``` {r R2ComparisonPlot, fig.height = 14, fig.width = 12, fig.cap = "\\label{fig:R2ComparisonPlot} Comparison of residual distributions as a function of fitted values in the linear model (top) and quadratic model (bottom)."}
 par(mfrow = c(2, 1))
 plot(mod.3, which = 1, cex.lab = 1.6, cex.axis = 1.4, main = NA)
 plot(mod.4, which = 1, cex.lab = 1.6, cex.axis = 1.4, main = NA)
 ```
 
-``` {r R3ComparisonPlot, fig.cap = "\\label{fig:R3ComparisonPlot} Comparison of standardised residual distributions as a function of observed values in the linear model (top) and quadratic model (bottom).", fig.height = 14, fig.width = 12}
+``` {r R3ComparisonPlot, fig.height = 14, fig.width = 12, fig.cap = "\\label{fig:R3ComparisonPlot} Comparison of standardised residual distributions as a function of observed values in the linear model (top) and quadratic model (bottom)."}
 par(mfrow = c(2, 1))
 plot(rstandard(mod.3) ~ SeedWidth, data = data.new, ylab = "Standardised Residuals",
      cex.lab = 1.6, cex.axis = 1.4)
@@ -228,70 +229,72 @@ The model resulting from this analysis suggests two things. First, pappus width 
 In addition to predicting seed terminal velocity based on the physical dimensions of the seed pappus, we are also interested in quantifying the extent to which two environmental effects (warming and mowing), affect seed terminal velocity.  Using the variation in termnal velocity across all six treatments shown in Figure \ref{fig:TVbarplot}, we can generate a preliminary hypothesis that warming increases terminal velocity while mowing decreases it. The following analysis determines whether such differences are statistically significant.
 
 ```{r TVbarplot, fig.cap = "\\label{fig:TVbarplot}Terminal velocity for plants grown under warming and mowing treatments. Height of bar shows group mean, and error bars show one standard error. Actual data shown with black dots. Less data exist for late mowed plants, as many of them died."}
-barplot.dat = aggregate(data.new$TV, by = list(Mowing = data.new$Mow, Warming = data.new$Warming), FUN = function(x) c(mean(x),sd = sd(x), n = length(x)))
-barplot.dat = do.call(data.frame, barplot.dat)
-barplot.dat$SE = barplot.dat$x.sd / sqrt(barplot.dat$x.n)
-colnames(barplot.dat) = c("Mowing", "Warming", "Mean", "SD", "n", "SE")
+barplot.dat <- aggregate(data.new$TV, by = list(Mowing = data.new$Mow, Warming = data.new$Warming), 
+                         FUN = function(x) c(mean(x), sd = sd(x), n = length(x)))
+barplot.dat <- do.call(data.frame, barplot.dat)
+barplot.dat$SE <- barplot.dat$x.sd/sqrt(barplot.dat$x.n)
+colnames(barplot.dat) <- c("Mowing", "Warming", "Mean", "SD", "n", "SE")
 
-ggplot(data = barplot.dat, aes(Mowing, Mean, fill = Warming))+
-  geom_bar(stat = "identity", position = position_dodge(0.9))+
-  geom_point(data = data.new, aes(x = Mow, group = Warming, y = TV), position = position_jitterdodge(dodge.width = 0.9), alpha = 0.5, shape = 16)+
-  geom_errorbar(aes(ymin = Mean - SE, ymax = Mean + SE), width = 0.2, position = position_dodge(0.9))+
-  labs(y = "Terminal Velocity")+
-  theme_bw()+
+ggplot(data = barplot.dat, aes(Mowing, Mean, fill = Warming)) +
+  geom_bar(stat = "identity", position = position_dodge(0.9)) +
+  geom_point(data = data.new, aes(x = Mow, group = Warming, y = TV), 
+             position = position_jitterdodge(dodge.width = 0.9), alpha = 0.5, shape = 16) +
+  geom_errorbar(aes(ymin = Mean - SE, ymax = Mean + SE), width = 0.2, position = position_dodge(0.9)) +
+  labs(y = "Terminal Velocity (m/s)") +
+  theme_bw() +
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())
 ```
 
 Because we are fitting a continutous response variable to categorical predictor variables, we can use an ANOVA model to characterize changes in terminal velocity by treatment. In order to compensate for the skewed right distribution of the terminal velocity data and significant deviations from error normality (Figure \ref{fig:TVHistAndErrors}), we log-transform terminal velocity for this analysis. We use two methods to identify the most appropriate model fit for the log-transformed terminal velocity data, starting by fitting the following four models:
 
-```{r TVHistAndErrors, fig.height = 3 , fig.width = 6, fig.cap = "\\label{fig:TVHistAndErrors} Histogram of terminal velocity (A) and Normal Q-Q plot of linear model with both warming and mowing predictors (B)."}
+```{r TVHistAndErrors, fig.height = 3, fig.width = 6, fig.cap = "\\label{fig:TVHistAndErrors} Histogram of terminal velocity (A) and normal Q-Q plot of linear model with both warming and mowing predictors (B)."}
 
 # show TV histogram
-p1 = ggplot(data = data.new)+
-  geom_histogram(aes(TV), fill = "white", color = "black", bins = 10)+
-  theme_bw()+
-  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())+
-  labs(x = "Terminal Velocity", y = "Count", tag = "A")
+p1 <- ggplot(data = data.new) +
+  geom_histogram(aes(TV), fill = "white", color = "black", bins = 10) +
+  theme_bw() +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
+  labs(x = "Terminal Velocity (m/s)", y = "Count", tag = "A")
 # show residuals 
-mod.TV = lm(TV ~ Warming + Mow, data = data.new)
-resid = as.data.frame(mod.TV$residuals)
-colnames(resid) = c("Residuals")
-p2 = ggplot(resid, aes(sample = Residuals))+
+mod.TV <- lm(TV ~ Warming + Mow, data = data.new)
+resid <- as.data.frame(mod.TV$residuals)
+colnames(resid) <- c("Residuals")
+p2 <- ggplot(resid, aes(sample = Residuals)) +
   stat_qq() + 
-  stat_qq_line()+
-  theme_bw()+
-  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())+
+  stat_qq_line() +
+  theme_bw() +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
   labs(x = "Theoretical", y = "Sample", tag = "B")
 grid.arrange(p1, p2, nrow = 1)
 
 ```
 
 \begin{itemize}
-\item `Mowing Only`: $Terminal Velcotiy = \beta_0 + \beta_1 Mow$
-\item `Warming Only`: $Terminal Velocity = \beta_0  + \beta_1 Warm$
-\item `Warming and Mowing`: $Terminal Velocity = \beta_0 + \beta_1 Mow+ \beta_2  Warm$
-\item `Interaction`: $Terminal Velocity = \beta_0 + \beta_1 Mow+ \beta_2 Warm + \beta_3 Warm \cdot Mow $
+\item Mowing Only: $Terminal Velcotiy = \beta_0 + \beta_1 Mow$
+\item Warming Only: $Terminal Velocity = \beta_0  + \beta_1 Warm$
+\item Warming and Mowing: $Terminal Velocity = \beta_0 + \beta_1 Mow+ \beta_2  Warm$
+\item Interaction: $Terminal Velocity = \beta_0 + \beta_1 Mow+ \beta_2 Warm + \beta_3 Warm \cdot Mow $
 \end{itemize}
 
 We use model *p*-values for the mowing only and warming only models to establish which provide a better fit for the data. Then, with the better fitting model as a base, we perform a partial *F*-test to identify whether additional variables significantly improve model fit. Second, to validate the results of the partial *F*-test, we evaluate both the AIC and BIC for each model. 
 
 ```{r ByTreatment_ANOVA_log, include = FALSE}
-# warming
-mod.warm.log = lm(log(TV) ~ Warming, data= data.new)
+# Warming
+mod.warm.log <- lm(log(TV) ~ Warming, data = data.new)
 summary(mod.warm.log)
-F.warm = summary((mod.warm.log))$fstatistic
+F.warm <- summary((mod.warm.log))$fstatistic
 
-# early vs. late mowing 
-mod.mow.log = lm(log(TV) ~ Mow, data= data.new)
+# Early vs. late mowing 
+mod.mow.log <- lm(log(TV) ~ Mow, data = data.new)
 summary(mod.mow.log)
-F.mow = summary((mod.mow.log))$fstatistic
+F.mow <- summary((mod.mow.log))$fstatistic
 
-# no interaction (E/L mow)
-mod.mowWarm.log = lm(log(TV) ~ Mow + Warming, data = data.new)
+# No interaction (E/L mow)
+mod.mowWarm.log <- lm(log(TV) ~ Mow + Warming, data = data.new)
 summary(mod.mowWarm.log)
 
-# interaction (E/L mow)
-mod.int.log = lm(log(TV) ~ Mow + Warming + Mow:Warming, data= data.new)
+# Interaction (E/L mow)
+mod.int.log <- lm(log(TV) ~ Mow + Warming + Mow:Warming, data = data.new)
 summary(mod.int.log)
 #anova(mod.int.log)
 
@@ -302,22 +305,26 @@ Here, the warming only model has a *p*-value of ```r round(pf(F.warm[1],F.warm[2
 Like the partial *F*-test, both AIC and BIC support the warming and mowing model (Table \ref{tab:TV_AIC}). Thus, we conclude that the warming and mowing model is the best fit for the log-transformed terminal velocity data.
 
 ```{r TV_ANOVAResults}
-tab.dat = anova(mod.warm.log, mod.mowWarm.log, mod.int.log)
-tab.dat = data.frame(Model = c("Warming Only", "Warming and Mowing", "Interaction"), "P-Value" = round(tab.dat[,"Pr(>F)"],4))
-kable(tab.dat, caption = "\\label{tab:TV_ANOVAResults}Results of partial $F$-test comparing three models for predicting terminal velocity.")
+tab.dat <- anova(mod.warm.log, mod.mowWarm.log, mod.int.log)
+tab.dat <- data.frame(Model = c("Warming Only", "Warming and Mowing", "Interaction"), 
+                     "P-Value" = round(tab.dat[, "Pr(>F)"], 4))
+kable(tab.dat, caption = "\\label{tab:TV_ANOVAResults} Results of partial $F$-test comparing three models for
+                          predicting terminal velocity.")
 ```
 
 ```{r TV_AIC}
-AIC = data.frame(Model =  c("Mowing Only","Warming Only", "Warming and Mowing", "Interaction"), AIC = c(AIC(mod.mow.log), AIC(mod.mow.log), AIC(mod.mowWarm.log), AIC(mod.int.log)), BIC = c(AIC(mod.mow.log, k = log(length(data.new))), AIC(mod.mow.log,k = log(length(data.new))), AIC(mod.mowWarm.log, k = log(length(data.new))), AIC(mod.int.log,k = log(length(data.new)))))
-AIC[2,3] = round(AIC[2,3],2)
-kable(AIC, caption = "\\label{tab:TV_AIC}AIC and BIC values for each model.")
+AIC <- data.frame(Model = c("Mowing Only","Warming Only", "Warming and Mowing", "Interaction"), 
+                  AIC = c(AIC(mod.mow.log), AIC(mod.mow.log), AIC(mod.mowWarm.log), AIC(mod.int.log)), 
+                  BIC = c(AIC(mod.mow.log, k = log(length(data.new))), AIC(mod.mow.log, k = log(length(data.new))), AIC(mod.mowWarm.log, k = log(length(data.new))), AIC(mod.int.log, k = log(length(data.new)))))
+AIC[2,3] <- round(AIC[2,3],2)
+kable(AIC, caption = "\\label{tab:TV_AIC} AIC and BIC values for each model.")
 ```
 
 The residuals for the warming and mowing model are shown in Figure \ref{fig:TV_Resids}. There do not appear to be any obvious patterns in the residuals, and though there are a few points with high leverage, they are not extremely influential according to Cook's distance. Lastly, it is evident that log-transformation significantly improves the normality of the errors, as can be seen in the Normal Q-Q plot. 
 
-```{r TV_Resids, fig.height = 14, fig.width = 12, fig.cap="\\label{fig:TV_Resids}Diagnostic plots for Warming and Mowing model."}
+```{r TV_Resids, fig.height = 14, fig.width = 12, fig.cap = "\\label{fig:TV_Resids}Diagnostic plots for warming and mowing model."}
 par(mfrow = c(2,2))
-plot(mod.mowWarm.log, cex.lab = 1.6, cex.axis = 1.4)
+plot(mod.mowWarm.log, cex.lab = 1.5, cex.axis = 1.3)
 ```
 
 Model results are shown in Table \ref{tab:TV_ModelResults} and treatment level predictions are shown in Figure \ref{fig:TV_ANOVATrtEst}. From these results, we conclude that early mowing significnatly decreases terminal velocity, whereas warming increases terminal velocity. 
@@ -325,7 +332,7 @@ Model results are shown in Table \ref{tab:TV_ModelResults} and treatment level p
 ```{r TV_ModelResults}
 df = round(summary(mod.mowWarm.log)$coefficients[,c(1,4)],2)
 df[,1] = paste(df[,1], " (", round(confint(mod.mowWarm.log)[,1],2),", ",round(confint(mod.mowWarm.log)[,2],2),")", sep = "")
-kable(df, caption = "\\label{tab:TV_ModelResults}Estimated coefficients and  $p$-values for Warming and Mowing model. 95% confidence interval shown in parenthesis.")
+kable(df, caption = "\\label{tab:TV_ModelResults}Estimated coefficients and  $p$-values for warming and mowing model. 95% confidence interval shown in parenthesis.")
 ```
 
 ```{r TV_ANOVATrtEst, fig.height = 5, fig.width = 9, fig.cap="\\label{fig:TV_ANOVATrtEst}Results of best fitting ANOVA model, which included both warming and mowing as predictors. Square dots show mean predicted value and error bars show 95% confidence intervals."}
@@ -345,7 +352,7 @@ ggplot(data = mowWarm.dat, aes(x = Mow, color = Warming))+
 
 Finally, we are also interested in exploring the extent to which the results of Research Question 2, or the changes in seed terminal velocity by treatment, can be explained by changes in seed pappus width. We are investigating pappus width specifically because the results of Research Question 1 show that it is a good predictor of terminal velocity. Figure \ref{fig:SWbarplot} shows the variation in pappus width across treatments. 
 
-```{r SWbarplot, fig.height = 5, fig.width = 9, fig.cap="\\label{fig:SWbarplot}Seed width by warming and mowing treatments. Height of bar shows group mean, and error bars show one standard error. Actual data shown with black dots."}
+```{r SWbarplot, fig.height = 5, fig.width = 9, fig.cap="\\label{fig:SWbarplot} Seed pappus width by warming and mowing treatments. Height of bar shows group mean, and error bars show one standard error. Actual data shown with black dots."}
 barplot.dat = aggregate(data.new$SeedWidth, by = list(Mowing = data.new$MowYN, Warming = data.new$Warming), FUN = function(x) c(mean(x),sd = sd(x), n = length(x)))
 barplot.dat = do.call(data.frame, barplot.dat)
 barplot.dat$SE = barplot.dat$x.sd / sqrt(barplot.dat$x.n)
@@ -356,7 +363,7 @@ ggplot(data = barplot.dat, aes(Mowing, Mean, fill = Warming))+
   geom_bar(stat = "identity", position = position_dodge(0.9))+
   geom_point(data = data.new, aes(x = ifelse(MowYN == 1, "Y", "N"), group = Warming, y = SeedWidth), position = position_jitterdodge(dodge.width = 0.9), alpha = 0.5, shape = 16)+
   geom_errorbar(aes(ymin = Mean - SE, ymax = Mean + SE), width = 0.2, position = position_dodge(0.9))+
-  labs(y = "Seed Width")+
+  labs(y = "Seed Pappus Width (mm)")+
   theme_bw()+
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())
 ```
@@ -389,7 +396,7 @@ Here, the warming only model has a *p*-value of ```r round( pf(F.warm[1],F.warm[
 ```{r SW_ANOVAResults}
 tab.dat = anova(SW.mow, SW.mowWarm, SW.int)
 tab.dat = data.frame(Model = c("`Mowing Only`", "`Warming and Mowing`", "`Interaction`"), "P-Value" = round(tab.dat[,"Pr(>F)"],4))
-kable(tab.dat, caption = "\\label{tab:SW_ANOVAResults}Results of partial $F$-test for models predicting seed width by treatment.")
+kable(tab.dat, caption = "\\label{tab:SW_ANOVAResults}Results of partial $F$-test for models predicting seed pappus width by treatment.")
 ```
 
 Again, we use AIC and BIC model selection criteria to validate these results. Table \ref{tab:SW_AIC} shows similar results to those in Research Question 2, suggesting that the warming and mowing model is the best fit.
@@ -398,14 +405,14 @@ Again, we use AIC and BIC model selection criteria to validate these results. Ta
 AIC = data.frame(Model =  c("`Mowing Only`","`Warming Only`", "`Warming and Mowing`", "`Interaction`"), AIC = c(AIC(SW.mow), AIC(SW.warm), AIC(SW.mowWarm), AIC(SW.int)), BIC = c(AIC(SW.mow, k = log(length(data.new))), AIC(SW.warm,k = log(length(data.new))), AIC(SW.mowWarm, k = log(length(data.new))), AIC(SW.int,k = log(length(data.new)))))
 AIC[2,3] = round(AIC[2,3],2)
 
-kable(AIC, caption = "\\label{tab:SW_AIC} AIC and BIC values for each of the four models predicting seed width.")
+kable(AIC, caption = "\\label{tab:SW_AIC} AIC and BIC values for each of the four models predicting seed pappus width.")
 ```
 
 Thus, both the partial *F*-test and the AIC/BIC values support the warming and mowing model, whose model diagnostic plots are shown in Figure \ref{fig:SW_Resids}. These residuals suggest the errors are approximately normally distributed. Again, there may be a few leverage points, though they do not have high influence. 
 
-```{r SW_Resids, fig.height = 14, fig.width = 12, fig.cap="\\label{fig:SW_Resids}Diagnostic plots for predicting seed width using `Warming and Mowing` model."}
+```{r SW_Resids, fig.height = 14, fig.width = 12, fig.cap="\\label{fig:SW_Resids}Diagnostic plots for predicting seed pappus width using warming and mowing model."}
 par(mfrow = c(2,2))
-plot(SW.mowWarm)
+plot(SW.mowWarm, cex.lab = 1.5, cex.axis = 1.3)
 ```
 
 Table \ref{tab:SW_ModelResults} shows the results of the warming and mowing model for predicting seed pappus width. These results suggest that both early mowing, late mowing, and warming signficantly decrease pappus width. 
@@ -413,7 +420,7 @@ Table \ref{tab:SW_ModelResults} shows the results of the warming and mowing mode
 ```{r SW_ModelResults}
 df = round(summary(SW.mowWarm)$coefficients[,c(1,4)],2)
 df[,1] = paste(df[,1], " (", round(confint(SW.mowWarm)[,1],2),", ",round(confint(SW.mowWarm)[,2],2),")", sep = "")
-kable(df, caption = "\\label{tab:SW_ModelResults} Results of Warming and Mowing model for predicting seed width. Coefficient estiamtes, 95% confidence intervals and $p$-values are shown.")
+kable(df, caption = "\\label{tab:SW_ModelResults} Results of Warming and Mowing model for predicting seed pappus width. Coefficient estiamtes, 95% confidence intervals and $p$-values are shown.")
 ```
 
 To investigate the pairwise comparisons between each group, we performed a post-hoc Tukey HSD test (Figure \ref{fig:SW_Tukey}). The results from this test suggest that there are two major groups which emerge: (1) non-mowed, control plants regardless of whether they were warmed and (2) warmed plants that were mowed, regardless of the timing of the mowing. Because the timing of the mowing does not appear to be a significant factor in determining pappus width, we fit a second model predicting pappus width based on warming and a binary mowing variable.  
@@ -441,19 +448,19 @@ summary(SWbin.int)
 
 ```{r SWbin_ANOVAResults}
 tab.dat = anova(SWbin.mow, SWbin.mowWarm, SWbin.int)
-tab.dat = data.frame(Model = c("Warming Only", "Warming and Mowing", "Interaction"), "P-Value" = round(tab.dat[,"Pr(>F)"],4))
-kable(tab.dat, caption = "\\label{tab:SWbin_ANOVAResults}Results of partial $F$-test performed for models predicting seed width using warming and binary mowing predictors.")
+tab.dat = data.frame(Model = c("Warming Only", "Warming and Mowing", "Interaction"), "P-Value" = round(tab.dat[,"Pr(>F)"], 4))
+kable(tab.dat, caption = "\\label{tab:SWbin_ANOVAResults}Results of partial $F$-test performed for models predicting seed pappus width using warming and binary mowing predictors.")
 ```
 
 ```{r SWbin_AIC}
 AIC = data.frame(Model =  c("Mowing Only","Warming Only", "Warming and Mowing", "Interaction"), AIC = c(AIC(SWbin.mow), AIC(SWbin.warm), AIC(SWbin.mowWarm), AIC(SWbin.int)), BIC = c(AIC(SWbin.mow, k = log(length(data.new))), AIC(SWbin.warm,k = log(length(data.new))), AIC(SWbin.mowWarm, k = log(length(data.new))), AIC(SWbin.int,k = log(length(data.new)))))
 AIC[2,3] = round(AIC[2,3],2)
-kable(AIC, caption = "\\label{tab:SWbin_AIC}AIC and BIC for models predicting seed width using warming and binary mowing predictors.")
+kable(AIC, caption = "\\label{tab:SWbin_AIC}AIC and BIC for models predicting seed pappus width using warming and binary mowing predictors.")
 ```
 
 Discerning between the warming and mowing and the interaction models is less clear in this case. On one hand, the partial *F*-test suggests the interaction model may provide a slightly better fit (Table \ref{tab:SWbin_ANOVAResults}) and the interaction model has the lowest AIC value (Table \ref{tab:SWbin_AIC}), but the warming and mowing model has the lowest BIC value (Table \ref{tab:SWbin_AIC}). This result is consistent with our expectations, as a slight improvement in model fit may not be enough to overcome the BIC penalty for an additional term in the interaction model. 
 
-The results of both models are summarized in Table \ref{tab:SWbin_ModelResults}. In the warming and mowing model, both treatments decrease pappus width; whereas when an interaction term is added, neither the warming nor mowing terms are significant, but the interaction term itself becomes significant at a significance level of 0.1.  
+The results of both models are summarized in Table \ref{tab:SWbin_ModelResults}. In the warming and mowing model, both treatments decrease pappus width; whereas when an interaction term is added, neither the warming nor mowing terms are significant, but the interaction term itself becomes significant at $\alpha = 0.1$.  
 
 ```{r SWbin_ModelResults}
 df1 = round(summary(SWbin.mowWarm)$coefficients[,c(1,4)],4)
@@ -466,20 +473,20 @@ colnames(df) = c("Warming and Mowing Estimate", "Pr(>|t|)", "Interaction Estimat
 df[,1] = paste(df[,1], " (", round(confint(SWbin.mowWarm)[,1],2),", ",round(confint(SWbin.mowWarm)[,2],2),")", sep = "")
 df[,3] = paste(df[,3], " (", round(confint(SWbin.int)[,1],2),", ",round(confint(SWbin.int)[,2],2),")", sep = "")
 df[4,1]=  NA
-kable(df, caption = "\\label{tab:SWbin_ModelResults}Results of Warming and Mowing and Interaction models, respectively.")
+kable(df, caption = "\\label{tab:SWbin_ModelResults}Results of warming and mowing and interaction models, respectively.")
 ```
 
 These two results suggest that plants which are both warmed and mowed have smaller pappus width. Plants which are both warmed and mowed are likely driving the significant mowing and warming coefficients we see in the warming and mowing model. Another post-hoc Tukey test, shown in Figure \ref{fig:SWbin_Tukey}, supports this conclusion. 
 
 ```{r SW_Tukey, fig.width = 7, fig.height = 4, fig.cap = "\\label{fig:SW_Tukey}Results of post-hoc Tukey HSD test. Letters indicate groups which are significantly different, where 0.05 is the significance level. Notation is as follows: CTL - no mowing, E - early mowing, L - late mowing; A - ambient (i.e. no warming), W - warming"}
 out = HSD.test(aov(SeedWidth ~ Mow + Warming + Mow:Warming, data= data.new), c("Mow","Warming"))
-bar.group(out$groups, ylim = c(0,25), xlab = "Mowing", ylab = "Seed Width", main = "Tukey HSD")
+bar.group(out$groups, ylim = c(0,25), xlab = "Mowing", ylab = "Seed Pappus Width (mm)", main = "Tukey HSD")
 ```
 
 ```{r SWbin_Tukey, fig.width = 7, fig.height = 4, fig.cap="\\label{fig:SWbin_Tukey}Results of post-hoc Tukey HSD test. Letters indicate groups which are significantly different, where 0.05 is the significance level. Notation is as follows: CTL - no mowing, M - mowing; A - ambient (i.e. no warming), W - warming"}
 out = HSD.test(aov(SeedWidth ~ MowYN + Warming + MowYN:Warming, data= data.new), c("MowYN","Warming"))
 rownames(out$groups) = c("CTL:A", "CTL:W", "M:A", "M:W")
-bar.group(out$groups, ylim = c(0,25), xlab = "Mowing", ylab = "Seed Width", main = "Tukey HSD")
+bar.group(out$groups, ylim = c(0,25), xlab = "Mowing", ylab = "Seed Pappus Width (mm)", main = "Tukey HSD")
 ```
 
 # Discussion
@@ -490,10 +497,9 @@ Theoretical$^5$ and experimental$^6$ results suggest that plants under stress wi
 
 We also found that warming increased terminal velocity. In this case, all else being equal, we would expect seeds to disperse less far. However, previous work in our lab$^7$ showed that warmed thistles reach taller heights. Given a fixed terminal velocity, seeds of taller plants are expected to disperse further. Thus, an increase in terminal velocity of warmed plants does not necessarily translate directly into less dispersal and spread. Further modeling, that includes changes in plant height as well as changes in terminal velocity, will quantify overall changes in thistle spread. 
  
-We showed that plants which were both warmed and mowed had smaller seed width. Based on our model which describes terminal velocity as a function of seed width (Research Question 1), we expect these warmed and mowed plants to have higher terminal velocity and, therefore, to disperse less far. Yet, in our analysis of changes in terminal velocity by treatment (Research Question 2), we showed mowing decreased terminal velocity. These discrepencies suggest that treatment level changes in seed terminal velcotiy cannot be fully explained by changes in seed width. 
+We showed that plants which were both warmed and mowed had smaller seed pappus width. Based on our model which describes terminal velocity as a function of seed pappus width (Research Question 1), we expect these warmed and mowed plants to have higher terminal velocity and, therefore, to disperse less far. Yet, in our analysis of changes in terminal velocity by treatment (Research Question 2), we showed mowing decreased terminal velocity. These discrepencies suggest that treatment level changes in seed terminal velcotiy cannot be fully explained by changes in seed pappus width. 
 
-This data set is lacking seed mass data, which may be responsible for the inconsistencies we observed. Seed mass is a second physical property needed to predict terminal velocity$^4$ and may also change with warming and mowing. Lacking seed mass data limits our ability to explain changes in seed terminal velocity through physical properties of the seed. However, our results which quantify the effect of the treatments on terminal velocity are unaffected, Further studies which measure both seed width and seed mass will be necessary to  explain  physical and biological mechanisms which explain the observed changes in terminal velocity. 
-
+This data set is lacking seed mass data, which may be responsible for the inconsistencies we observed. Seed mass is a second physical property needed to predict terminal velocity$^4$ and may also change with warming and mowing. Lacking seed mass data limits our ability to explain changes in seed terminal velocity through physical properties of the seed. However, our results which quantify the effect of the treatments on terminal velocity are unaffected, Further studies which measure both seed pappus width and seed mass will be necessary to  explain  physical and biological mechanisms which explain the observed changes in terminal velocity. 
 
 # References
 1. US National Plant Germplasm System. Website  [npgsweb.ars-grin.gov](https://npgsweb.ars-grin.gov/gringlobal/taxonomydetail.aspx?id=104109) accessed 10 December 2019.
