@@ -149,18 +149,37 @@ summary(mod.2)
 ```
 
 ``` {r ModelComparisonTable}
-mod.1.out <- cbind(c(summary(mod.1)$coefficients[1:3, 1], rep(NA, 2), summary(mod.1)$coefficients[4:5, 1]),
-                   c(summary(mod.1)$coefficients[1:3, 1], rep(NA, 2), summary(mod.1)$coefficients[4:5, 1]),
-                   c(summary(mod.1)$coefficients[1:3, 1], rep(NA, 2), summary(mod.1)$coefficients[4:5, 1]),
-                   c(summary(mod.2)$coefficients[1:2, 1], NA, summary(mod.1)$coefficients[4, 1], rep(NA, 3)),
-                   c(NA, vif(mod.1)[1:2], rep(NA, 2), vif(mod.1)[3:4]),
-                   c(NA, vif(mod.2)[1], NA, vif(mod.2)[2], rep(NA, 3)))
-mod.1.out <- rbind(mod.1.out, c(rep(-1293.6, 3), -1288.4, rep(NA, 2)),
-                              c(rep(summary(mod.1)$adj.r.squared, 3), summary(mod.2)$adj.r.squared, rep(NA, 2)))
-mod.1.out <- round(mod.1.out, digits = 4)
+# mod.1.out <- cbind(c(summary(mod.1)$coefficients[1:3, 1], rep(NA, 2), summary(mod.1)$coefficients[4:5, 1]),
+#                    c(summary(mod.1)$coefficients[1:3, 1], rep(NA, 2), summary(mod.1)$coefficients[4:5, 1]),
+#                    c(summary(mod.1)$coefficients[1:3, 1], rep(NA, 2), summary(mod.1)$coefficients[4:5, 1]),
+#                    c(summary(mod.2)$coefficients[1:2, 1], NA, summary(mod.1)$coefficients[4, 1], rep(NA, 3)),
+#                    c(NA, vif(mod.1)[1:2], rep(NA, 2), vif(mod.1)[3:4]),
+#                    c(NA, vif(mod.2)[1], NA, vif(mod.2)[2], rep(NA, 3)))
+# mod.1.out <- rbind(mod.1.out, c(rep(-1293.6, 3), -1288.4, rep(NA, 2)),
+#                               c(rep(summary(mod.1)$adj.r.squared, 3), summary(mod.2)$adj.r.squared, rep(NA, 2)))
+# mod.1.out <- round(mod.1.out, digits = 4)
+# dimnames(mod.1.out)[[1]] <- c(dimnames(mod.full.out)[[1]], "AIC", "$R^2$")
+# dimnames(mod.1.out)[[2]] <- c("Method 1", "Method 2", "Method 3", "Method 4", "Model 1 VIF", "Model 2 VIF")
+
+coeff.1 = round(summary(mod.1)$coefficients,4)
+confint.1 = round(confint(mod.1),4)
+coeff.2 = round(summary(mod.2)$coefficients,4) 
+confint.2 = round(confint(mod.2),4)
+vif.1 = round(vif(mod.1),4)
+vif.2 = round(vif(mod.2),4)
+
+mod.1.out <- cbind(c(paste(coeff.1[1:3, 1], " (",confint.1[1:3,1]," ,", confint.1[1:3,2],")", sep = ""), 
+                     rep(NA, 2), paste(coeff.1[4:5, 1], " (",confint.1[4:5,1]," ,", confint.1[4:5,2],")", sep = "")),
+                   c(paste(coeff.2[1:2, 1], " (",confint.2[1:2,1]," ,", confint.2[1:2,2],")", sep = ""), 
+                     NA, paste(coeff.2[3, 1], " (",confint.2[3,1]," ,", confint.2[3,2],")", sep = ""), rep(NA, 3)),
+                   c(NA, vif.1[1:2], rep(NA, 2), vif.1[3:4]),
+                   c(NA, vif.2[1], NA, vif.2[2], rep(NA, 3)))
+mod.1.out <- rbind(mod.1.out, c(-1293.6, -1288.4, rep(NA, 2)),
+                              c(round(summary(mod.1)$adj.r.squared, 4), round(summary(mod.2)$adj.r.squared,4), rep(NA, 2)))
+#mod.1.out <- round(mod.1.out, digits = 4)
 dimnames(mod.1.out)[[1]] <- c(dimnames(mod.full.out)[[1]], "AIC", "$R^2$")
-dimnames(mod.1.out)[[2]] <- c("Method 1", "Method 2", "Method 3", "Method 4", "Model 1 VIF", "Model 2 VIF")
-kable(mod.1.out, align = "r", caption = "\\label{tab:ModelComparisonTable} Estimates of the regression                                                  coefficients for Model 1 (resulting from methods 1-3) and model 4                                               (resulting from method 4).")
+dimnames(mod.1.out)[[2]] <- c("Methods 1-3", "Method 4", "Model 1 VIF", "Model 2 VIF")
+kable(mod.1.out, align = "r", caption = "\\label{tab:ModelComparisonTable} Estimates of the regression                                                  coefficients for Model 1 (resulting from methods 1-3) and Model 4                                               (resulting from method 4).")
 
 ```
 
@@ -189,12 +208,19 @@ Comparing Model 4 to Model 3 (where VIF is not an issue), we see that the simple
 We can also compare the distribution of residuals between the two models to check their validity. As can be seen in Figure \ref{fig:R1ComparisonPlot}, the residuals are approximately normally-distributed for both models, with a bit of deviation from normality at the tails of the distribution. However, there are clearly differences regarding patterns of distribution in the residuals, as shown in Figure \ref{fig:R2ComparisonPlot} and Figure \ref{fig:R3ComparisonPlot}. For Model 3, there appears to be some curvature in the distribution of residuals, suggesting that an invalid model has been fit to the data. However, in Model 4, the curved pattern in the residuals disappears, suggesting that this model is more valid.
 
 ``` {r TVComparisonPlot, fig.height = 6, fig.width = 10, fig.cap = "\\label{fig:TVComparisonPlot} Plot of seed terminal velocity as a function  of pappus width. The two models are also plotted: the quadratic model (orange) and the linear model (blue)."}
-plot(TV ~ SeedWidth, data = data.new, cex.lab = 1.4, cex.axis = 1.2, xlab = "Seed Pappus Width (mm)",
-     ylab = "Terminal Velocity (m/s)")
 testdata <- data.frame(SeedWidth = seq(min(data.new$SeedWidth), max(data.new$SeedWidth), length.out = 300))
-testdata$TV = predict(mod.4, newdata = testdata)
-with(testdata, lines(x = SeedWidth, y = TV, col = "chocolate1", lwd = 2))
-abline(mod.3, col = "deepskyblue", lwd = 2)
+testdata = cbind(testdata, predict(mod.4, newdata = testdata, interval = "confidence"))
+testdata = rbind(testdata, cbind(SeedWidth = seq(min(data.new$SeedWidth), max(data.new$SeedWidth), length.out = 300), predict(mod.3, newdata = testdata, interval = "confidence")))
+testdata$Model = factor(c(rep("Quadratic Model", times = 300), rep("Linear Model", times = 300)))
+ggplot(data = testdata, aes(x = SeedWidth))+
+  geom_point(data = data.new, aes(x = SeedWidth, y = TV), shape = 1, size = 1.8)+
+  geom_ribbon(aes(ymin = lwr, ymax = upr, fill = Model), alpha = 0.25)+
+  geom_line(aes(y = fit, color = Model), size = 1.2)+
+  theme_bw() +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), legend.position = "none") +
+  labs(x = "Seed Pappus Width (mm)", y = "Terminal Velocity (m/s)")+
+  scale_color_manual(values = c("deepskyblue","chocolate1"))+
+  scale_fill_manual(values = c("deepskyblue","chocolate1"))
 remove(testdata)
 ```
 
@@ -395,14 +421,14 @@ Here, the warming only model has a *p*-value of ```r round( pf(F.warm[1],F.warm[
 
 ```{r SW_ANOVAResults}
 tab.dat = anova(SW.mow, SW.mowWarm, SW.int)
-tab.dat = data.frame(Model = c("`Mowing Only`", "`Warming and Mowing`", "`Interaction`"), "P-Value" = round(tab.dat[,"Pr(>F)"],4))
+tab.dat = data.frame(Model = c("Mowing Only", "Warming and Mowing", "Interaction"), "P-Value" = round(tab.dat[,"Pr(>F)"],4))
 kable(tab.dat, caption = "\\label{tab:SW_ANOVAResults}Results of partial $F$-test for models predicting seed pappus width by treatment.")
 ```
 
 Again, we use AIC and BIC model selection criteria to validate these results. Table \ref{tab:SW_AIC} shows similar results to those in Research Question 2, suggesting that the warming and mowing model is the best fit.
 
 ```{r SW_AIC}
-AIC = data.frame(Model =  c("`Mowing Only`","`Warming Only`", "`Warming and Mowing`", "`Interaction`"), AIC = c(AIC(SW.mow), AIC(SW.warm), AIC(SW.mowWarm), AIC(SW.int)), BIC = c(AIC(SW.mow, k = log(length(data.new))), AIC(SW.warm,k = log(length(data.new))), AIC(SW.mowWarm, k = log(length(data.new))), AIC(SW.int,k = log(length(data.new)))))
+AIC = data.frame(Model =  c("Mowing Only","Warming Only", "Warming and Mowing", "Interaction"), AIC = c(AIC(SW.mow), AIC(SW.warm), AIC(SW.mowWarm), AIC(SW.int)), BIC = c(AIC(SW.mow, k = log(length(data.new))), AIC(SW.warm,k = log(length(data.new))), AIC(SW.mowWarm, k = log(length(data.new))), AIC(SW.int,k = log(length(data.new)))))
 AIC[2,3] = round(AIC[2,3],2)
 
 kable(AIC, caption = "\\label{tab:SW_AIC} AIC and BIC values for each of the four models predicting seed pappus width.")
